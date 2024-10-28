@@ -14,14 +14,16 @@ private val DarkColorScheme = darkColorScheme(
     background = bg,
     onBackground = bg_item,
     primary = blue,
-    secondary = gray
+    secondary = gray,
+    tertiary = red
 )
 
 private val LightColorScheme = lightColorScheme(
     background = bg,
     onBackground = bg_item,
     primary = blue,
-    secondary = gray
+    secondary = gray,
+    tertiary = red
 )
 
 @Composable
