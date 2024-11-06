@@ -88,7 +88,11 @@ fun Header(vm: MyViewModel = viewModel(), pagerState: PagerState, navController:
             }
         }
         IconButton(
-            onClick = {},
+            onClick = {
+                navController.navigate("settings") {
+                    popUpTo("main")
+                }
+            },
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_settings),

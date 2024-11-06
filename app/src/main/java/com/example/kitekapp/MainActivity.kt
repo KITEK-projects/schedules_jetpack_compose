@@ -16,7 +16,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.kitekapp.ui.screens.Main
-import com.example.kitekapp.ui.screens.Main_change
+import com.example.kitekapp.ui.screens.Change
+import com.example.kitekapp.ui.screens.Settings
 import com.example.kitekapp.ui.theme.KITEKAPPTheme
 
 class MainActivity : ComponentActivity() {
@@ -40,7 +41,16 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("change_schedule") {
-                            Main_change(
+                            Change(
+                                modifier = Modifier
+                                    .padding(innerPadding)
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.background),
+                                navController
+                            )
+                        }
+                        composable("settings") {
+                            Settings(
                                 modifier = Modifier
                                     .padding(innerPadding)
                                     .fillMaxSize()
@@ -49,7 +59,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-
                 }
             }
         }

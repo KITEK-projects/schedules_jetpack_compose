@@ -1,22 +1,16 @@
 package com.example.kitekapp.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonColors
@@ -36,56 +30,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.kitekapp.R
 
 @Composable
-fun Main_change(modifier: Modifier = Modifier, navController: NavController) {
+fun Change(modifier: Modifier = Modifier, navController: NavController) {
     Column(
         modifier = modifier
     ) {
-        Header(navController)
+        Header(navController, "Выбор расписания")
         ChangeSchedule()
     }
 
-}
-
-@Composable
-fun Header(navController: NavController) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 10.dp)
-        ) {
-            Text(
-                text = "Выбор расписания",
-                style = MaterialTheme.typography.displayLarge,
-                color = Color.White,
-            )
-            IconButton(
-                onClick = {
-                    navController.navigate("main") {
-                        // Убрать возращение в change
-                    }
-                },
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close),
-                    contentDescription = "Close",
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onPrimary)
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,7 +71,7 @@ fun ChangeSchedule() {
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 5.dp)
         ) {
             options.forEachIndexed { index, label ->
                 SegmentedButton(
@@ -139,7 +95,7 @@ fun ChangeSchedule() {
                     ),
                     icon = {},
                     modifier = Modifier
-                        .height(52.dp)
+                        .padding(vertical = 12.dp)
                 ) {
                     Text(
                         text = label,
@@ -152,59 +108,46 @@ fun ChangeSchedule() {
         Column {
             Box(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(MaterialTheme.colorScheme.onBackground)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
-                    Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.onBackground)
-                        .fillMaxWidth()
-                        .height(52.dp)
-                )
-                TextField(
-                    value = textField,
-                    onValueChange = { textField = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.Transparent),
-                    colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        cursorColor = Color.White,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedPlaceholderColor = Color.White,
-                        unfocusedPlaceholderColor = Color.White
-                    ),
-                    textStyle = MaterialTheme.typography.displayMedium,
-                    placeholder = {
-                        if (selectedIndex == 0) {
-                            Text(
-                                "Введите фамилию",
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        } else {
-                            Text(
-                                "Введите группу",
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                    },
-                    singleLine = true,
-                )
+                    TextField(
+                        value = textField,
+                        onValueChange = { textField = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.Transparent),
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            cursorColor = Color.White,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedPlaceholderColor = Color.White,
+                            unfocusedPlaceholderColor = Color.White
+                        ),
+                        textStyle = MaterialTheme.typography.displayMedium,
+                        placeholder = {
+                            if (selectedIndex == 0) {
+                                Text(
+                                    "Введите фамилию",
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            } else {
+                                Text(
+                                    "Введите группу",
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        },
+                        singleLine = true,
+                        )
             }
-//            Text(
-//                text = "можно без капса...",
-//                style = MaterialTheme.typography.displaySmall,
-//                color = MaterialTheme.colorScheme.secondary,
-//                modifier = Modifier
-//                    .padding(horizontal = 24.dp)
-//                    .fillMaxWidth(),
-//            )
         }
 
         LazyColumn(
