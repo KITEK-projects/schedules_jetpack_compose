@@ -6,6 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.kitekapp.retrofit2.ScheduleApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -29,67 +36,44 @@ data class Schedules(
 )
 
 class MyViewModel: ViewModel() {
-    var schedule by mutableStateOf(Schedules(
-        "Марченко Е. А.",
-        listOf(
-            Schedule(
-                "2021-10-11",
-                listOf(
-                    ClassItem(
-                        2,
-                        "управление командой проекта",
-                        "вариатив",
-                        "Марченко Е. А.",
-                        "Пенис"
-                    ),
-                    ClassItem(
-                        3,
-                        "организация и технология производства продукции оп.",
-                        "модуль 1",
-                        "Коптева Л. С.",
-                        "12"
-                    ),
-                    ClassItem(
-                        4,
-                        "организация и технология производства продукции оп.",
-                        "модуль 1",
-                        "Коптева Л. С.",
-                        "12"
-                    ),
-                    ClassItem(
-                        5,
-                        "психология и этика проф. д-ти",
-                        "лекция",
-                        "Марченко Е. А.",
-                        ""
-                    )
-                )
-            ),
-            Schedule(
-                "2021-10-12",
-                listOf(
-                    ClassItem(
-                        4,
-                        "организация и технология производства продукции оп.",
-                        "модуль 1",
-                        "Коптева Л. С.",
-                        "12"
-                    ),
-                    ClassItem(
-                        5,
-                        "организация и технология производства продукции оп.",
-                        "модуль 1",
-                        "Коптева Л. С.",
-                        "12"
-                    )
-                )
-            )
-        )
-    ))
+    var schedule by mutableStateOf<Schedules?>(null)
+
+    var error by mutableStateOf<String?>(null)
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://schedule.omsktec-playgrounds.ru/api/v1/")
+        .addConverterFactory(GsonConverterFactory.create()).build()
+    private val scheduleApi = retrofit.create(ScheduleApi::class.java)
+
+    fun getSchedule() {
+        viewModelScope.launch {
+            try {
+                val answer = scheduleApi.getSchedule("ИСР-41", "20210411T010000+0600")
+
+                if (answer.isSuccessful) {
+                    schedule = answer.body()
+                    error = null
+                } else {
+                    error = "${answer.body().toString()}, ${answer.code()}"
+                }
+            } catch (e: Exception) {
+                error = e.message
+            }
+        }
+    }
+
+    private fun handleError(code: Int) {
+        error = when (code) {
+            400 -> "Bad Request"
+            404 -> "Not Found"
+            500 -> "Server Error"
+            else -> "Unknown Error"
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun GetDate(page: Int): String {
-        val date = LocalDate.parse(schedule.schedule[page].date)
+    fun getDate(page: Int): String {
+        val date = LocalDate.parse("2021-10-11")
         if (date.isEqual(LocalDate.now())) {
             return "Сегодня"
         }

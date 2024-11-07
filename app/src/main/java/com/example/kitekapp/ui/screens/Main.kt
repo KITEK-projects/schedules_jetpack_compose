@@ -19,6 +19,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,12 +44,32 @@ fun Main(
     navController: NavController,
     vm: MyViewModel = viewModel())
 {
-    val pagerState = rememberPagerState { vm.schedule.schedule.size }
-    Column(
-        modifier = modifier,
-    ) {
-        Header(pagerState = pagerState, navController = navController)
-        Schedule(pagerState = pagerState)
+    if (vm.schedule != null) {
+        val pagerState = rememberPagerState { vm.schedule!!.schedule.size }
+        Column(
+            modifier = modifier,
+        ) {
+            Header(pagerState = pagerState, navController = navController)
+            Schedule(pagerState = pagerState)
+        }
+    } else {
+        vm.getSchedule()
+        Column (
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (vm.error == null) {
+                CircularProgressIndicator()
+            } else {
+                Text(
+                    text = vm.error!!,
+                    style = MaterialTheme.typography.displaySmall,
+                    color = Color.White,
+                )
+                // Экран ошибок
+            }
+        }
     }
 }
 
@@ -64,7 +85,7 @@ fun Header(vm: MyViewModel = viewModel(), pagerState: PagerState, navController:
     ) {
         Row {
             Text(
-                text = vm.GetDate(pagerState.currentPage),
+                text = vm.getDate(pagerState.currentPage),
                 style = MaterialTheme.typography.displayLarge,
                 color = Color.White,
                 modifier = Modifier.padding(end = 8.dp)
@@ -81,7 +102,7 @@ fun Header(vm: MyViewModel = viewModel(), pagerState: PagerState, navController:
                     },
             ) {
                 Text(
-                    text = vm.schedule.client,
+                    text = vm.schedule!!.client,
                     style = MaterialTheme.typography.displaySmall,
                     color = Color.White
                 )
@@ -111,7 +132,7 @@ fun Schedule(vm: MyViewModel = viewModel(), pagerState: PagerState) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(vm.schedule.schedule[page].classes) {
+                items(vm.schedule!!.schedule[page].classes) {
                         item -> Item(item)
                 }
             }
