@@ -8,8 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kitekapp.retrofit2.ScheduleApi
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -38,7 +36,8 @@ data class Schedules(
 class MyViewModel: ViewModel() {
     var schedule by mutableStateOf<Schedules?>(null)
 
-    var error by mutableStateOf<String?>(null)
+    var error by mutableStateOf<Int?>(null)
+    var messageError by mutableStateOf<String?>(null)
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://schedule.omsktec-playgrounds.ru/api/v1/")
@@ -54,23 +53,13 @@ class MyViewModel: ViewModel() {
                     schedule = answer.body()
                     error = null
                 } else {
-                    error = "${answer.body().toString()}, ${answer.code()}"
+                    error = answer.code()
                 }
             } catch (e: Exception) {
-                error = e.message
+                messageError = e.toString()
             }
         }
     }
-
-    private fun handleError(code: Int) {
-        error = when (code) {
-            400 -> "Bad Request"
-            404 -> "Not Found"
-            500 -> "Server Error"
-            else -> "Unknown Error"
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     fun getDate(page: Int): String {
         val date = LocalDate.parse("2021-10-11")
@@ -88,4 +77,26 @@ class MyViewModel: ViewModel() {
             return date.format(formatter)
         }
     }
+
+    fun typeClient(input: String): String {
+        if (input.contains('.')) {
+            return "teach"
+        } else {
+            val digits = input.filter { it.isDigit() }
+            return if ( digits != "") {
+                when (digits.first()) {
+                    '1', '2' -> "1-2"
+                    '3', '4' -> "3-4"
+                    else -> {
+                        "Empty"
+                    }
+                }
+            } else {
+                "Not"
+            }
+        }
+    }
+//    fun getTimePair(number: Int,): String {
+//
+//    }
 }

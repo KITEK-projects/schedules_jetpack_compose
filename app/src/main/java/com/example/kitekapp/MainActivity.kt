@@ -1,5 +1,6 @@
 package com.example.kitekapp
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,6 +22,7 @@ import com.example.kitekapp.ui.screens.Settings
 import com.example.kitekapp.ui.theme.KITEKAPPTheme
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("ResourceType")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

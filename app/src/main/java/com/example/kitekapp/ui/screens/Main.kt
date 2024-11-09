@@ -2,6 +2,12 @@ package com.example.kitekapp.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.DecayAnimationSpec
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,8 +49,8 @@ import com.example.kitekapp.R
 fun Main(
     modifier: Modifier = Modifier,
     navController: NavController,
-    vm: MyViewModel = viewModel())
-{
+    vm: MyViewModel = viewModel()
+) {
     if (vm.schedule != null) {
         val pagerState = rememberPagerState { vm.schedule!!.schedule.size }
         Column(
@@ -54,20 +61,18 @@ fun Main(
         }
     } else {
         vm.getSchedule()
-        Column (
+        Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if (vm.error == null) {
-                CircularProgressIndicator()
-            } else {
-                Text(
-                    text = vm.error!!,
-                    style = MaterialTheme.typography.displaySmall,
-                    color = Color.White,
+            if (vm.error == null && vm.messageError == null) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 2.5.dp,
                 )
-                // Экран ошибок
+            } else {
+                ErrorsScreen(navController)
             }
         }
     }
@@ -125,15 +130,77 @@ fun Header(vm: MyViewModel = viewModel(), pagerState: PagerState, navController:
     }
 }
 
+
 @Composable
 fun Schedule(vm: MyViewModel = viewModel(), pagerState: PagerState) {
+    val decayAnimationSpec = tween<Float>(durationMillis = 200)
+    val snapAnimationSpec = spring(
+        stiffness = Spring.StiffnessMedium,
+        visibilityThreshold = Int.VisibilityThreshold.toFloat(),
+        dampingRatio = Spring.DampingRatioNoBouncy
+    )
     Column {
-        HorizontalPager(state = pagerState) { page ->
+        HorizontalPager(
+            state = pagerState,
+            beyondViewportPageCount = 1,
+        ) { page ->
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                flingBehavior = PagerDefaults.flingBehavior(
+                    state = pagerState,
+                    decayAnimationSpec = rememberSplineBasedDecay(),
+                    snapAnimationSpec = snapAnimationSpec
+                )
             ) {
-                items(vm.schedule!!.schedule[page].classes) {
-                        item -> Item(item)
+                items(vm.schedule!!.schedule[page].classes) { item ->
+                    if (item.number == 2) {
+                        if (vm.typeClient(vm.schedule!!.client) == "1-2") {
+                            Column {
+                                Item(item)
+                                Row(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "14:45 - 15:35",
+                                        style = MaterialTheme.typography.displayMedium,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.padding(end = 5.dp)
+                                    )
+                                    Text(
+                                        text = "Обеденный перерыв",
+                                        style = MaterialTheme.typography.displayMedium,
+                                        color = Color.White,
+                                    )
+                                }
+                                Item(item)
+                            }
+                        } else if (vm.typeClient(vm.schedule!!.client) == "3-4") {
+                            Column {
+                                Item(item)
+                                Row(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "14:45 - 15:35",
+                                        style = MaterialTheme.typography.displayMedium,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.padding(end = 5.dp)
+                                    )
+                                    Text(
+                                        text = "Обеденный перерыв",
+                                        style = MaterialTheme.typography.displayMedium,
+                                        color = Color.White,
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        Item(item)
+                    }
                 }
             }
         }
@@ -144,104 +211,82 @@ fun Schedule(vm: MyViewModel = viewModel(), pagerState: PagerState) {
 
 @Composable
 fun Item(item: ClassItem) {
-    Column(
+
+    Row(
         modifier = Modifier
             .padding(horizontal = 14.dp, vertical = 8.dp)
-            .fillMaxSize()
-    ){
-        Row(
+            .clip(RoundedCornerShape(8.dp))
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.onBackground)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.onBackground)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxHeight()
+                .padding(end = 16.dp),
         ) {
-            Column(
+            Text(
+                text = "08:45",
+                style = MaterialTheme.typography.displayLarge,
+                color = Color.White,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            Text(
+                text = "10:15",
+                style = MaterialTheme.typography.displayMedium,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+        Column {
+            Text(
+                text = item.partner,
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.displayMedium,
+                color = Color.White,
+            )
+            Row(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(end = 16.dp),
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
             ) {
                 Text(
-                    text = "08:45",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = Color.White,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Text(
-                    text = "10:15",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-            }
-            Column {
-                Text(
-                    text = item.partner,
+                    text = "${item.number} пара",
                     style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(end = 8.dp)
                 )
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.displayMedium,
-                    color = Color.White,
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                ) {
+                Row {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_book),
+                        contentDescription = "book",
+                        tint = MaterialTheme.colorScheme.secondary,
+                    )
                     Text(
-                        text = "${item.number} пара",
+                        text = item.type,
                         style = MaterialTheme.typography.displaySmall,
                         color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(end = 8.dp)
                     )
-                    Row {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_book),
-                            contentDescription = "book",
-                            tint = MaterialTheme.colorScheme.secondary,
-                        )
-                        Text(
-                            text = item.type,
-                            style = MaterialTheme.typography.displaySmall,
-                            color = MaterialTheme.colorScheme.secondary,
-                        )
-                    }
-                    if (item.location != "") {
-                        Text(
-                            text = if (item.location.all { it.isDigit() }) "${item.location} каб." else item.location,
-                            style = MaterialTheme.typography.displaySmall,
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clip(RoundedCornerShape(25.dp))
-                                .background(MaterialTheme.colorScheme.onSecondary)
-                                .padding(horizontal = 8.dp)
-                        )
-                    }
+                }
+                if (item.location != "") {
+                    Text(
+                        text = if (item.location.all { it.isDigit() }) "${item.location} каб." else item.location,
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .clip(RoundedCornerShape(25.dp))
+                            .background(MaterialTheme.colorScheme.onSecondary)
+                            .padding(horizontal = 8.dp)
+                    )
                 }
             }
         }
-        if (item.number == 2) {
-            Row(
-                modifier = Modifier
-                    .padding(end = 4.dp, start = 4.dp, top = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "14:45 - 15:35",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(end = 5.dp)
-                )
-                Text(
-                    text = "Обеденный перерыв",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = Color.White,
-                )
-            }
-        }
     }
+
 }
