@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
@@ -25,7 +24,7 @@ import com.example.kitekapp.R
 @Composable
 fun ErrorsScreen(
     navController: NavController,
-    vm: MyViewModel = viewModel()
+    vm: MyViewModel
 ) {
     Box(
         modifier = Modifier.fillMaxSize()
@@ -72,11 +71,28 @@ fun ErrorsScreen(
                     400 -> "Такого клиента нет, ${vm.error}"
                     404 -> "Нет расписания, ${vm.error}"
                     500 -> "Ошибка сервера, ${vm.error}"
+                    null -> "Нет подключения, лол)"
                     else -> "${vm.error}, ${vm.messageError}"},
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.secondary,
             )
+
+            IconButton(
+                onClick = {
+                    navController.navigate("change_schedule") {
+                        popUpTo("main")
+                    }
+                },
+                modifier = Modifier.padding(top = 24.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_refresh),
+                    contentDescription = "Right",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
 
         }
     }

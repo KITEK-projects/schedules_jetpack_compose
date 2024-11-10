@@ -5,8 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonColors
@@ -24,8 +27,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.kitekapp.R
 
 
 @Composable
@@ -34,17 +39,44 @@ fun Settings(modifier: Modifier = Modifier, navController: NavController) {
         modifier = modifier
     ) {
         Header(navController, "Настройки")
-        ChangeTimeClass()
+        Screen(navController)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangeTimeClass() {
+fun Screen(navController: NavController) {
     var selectedIndex by remember { mutableIntStateOf(1) }
     val options = listOf("1:20", "1:30", "1:10")
     val checkedState = remember { mutableStateOf(true) }
     Column {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 5.dp)
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "Выбор расписания",
+                style = MaterialTheme.typography.displayMedium,
+                color = Color.White
+            )
+            IconButton(
+                onClick = {
+                    navController.navigate("change_schedule") {
+                        popUpTo("main")
+                    }
+                }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_right),
+                    contentDescription = "Right",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+        }
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,

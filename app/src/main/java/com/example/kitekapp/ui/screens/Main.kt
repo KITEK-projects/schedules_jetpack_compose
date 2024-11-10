@@ -2,21 +2,20 @@ package com.example.kitekapp.ui.screens
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,21 +25,20 @@ import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.kitekapp.ClassItem
 import com.example.kitekapp.MyViewModel
@@ -74,7 +72,7 @@ fun Main(
                     strokeWidth = 2.5.dp,
                 )
             } else {
-                ErrorsScreen(navController)
+                ErrorsScreen(vm = vm, navController = navController)
             }
         }
     }
@@ -90,23 +88,29 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = vm.getDate(pagerState.currentPage),
                 style = MaterialTheme.typography.displayLarge,
                 color = Color.White,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                    .clickable {
-                        navController.navigate("change_schedule") {
-                            popUpTo("main")
-                        }
-                    },
+                    .padding(end = 8.dp)
+            )
+            Button(
+                modifier = Modifier
+                    .heightIn(min = 20.dp, max = 30.dp),
+                onClick = {
+                    navController.navigate("change_schedule") {
+                        popUpTo("main")
+                    }
+                },
+                shape = RoundedCornerShape(4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
             ) {
                 Text(
                     text = vm.schedule.client,
@@ -154,52 +158,10 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState) {
                     snapAnimationSpec = snapAnimationSpec
                 )
             ) {
-                items(vm.schedule.schedule[page].classes) { item ->
+                items(vm.schedule.schedule.getOrNull(page)?.classes ?: emptyList()) { item ->
                     if (item.number == 2) {
-                        if (vm.typeClient(vm.schedule.client) == "1-2") {
-                            Column {
-                                Item(item)
-                                Row(
-                                    modifier = Modifier
-                                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "14:45 - 15:35",
-                                        style = MaterialTheme.typography.displayMedium,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        modifier = Modifier.padding(end = 5.dp)
-                                    )
-                                    Text(
-                                        text = "Обеденный перерыв",
-                                        style = MaterialTheme.typography.displayMedium,
-                                        color = Color.White,
-                                    )
-                                }
-                                Item(item)
-                            }
-                        } else if (vm.typeClient(vm.schedule.client) == "3-4") {
-                            Column {
-                                Item(item)
-                                Row(
-                                    modifier = Modifier
-                                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "14:45 - 15:35",
-                                        style = MaterialTheme.typography.displayMedium,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        modifier = Modifier.padding(end = 5.dp)
-                                    )
-                                    Text(
-                                        text = "Обеденный перерыв",
-                                        style = MaterialTheme.typography.displayMedium,
-                                        color = Color.White,
-                                    )
-                                }
-                            }
-                        }
+                        Item(item)
+                        LunchItem()
                     } else {
                         Item(item)
                     }
@@ -290,5 +252,5 @@ fun Item(item: ClassItem) {
             }
         }
     }
-
 }
+

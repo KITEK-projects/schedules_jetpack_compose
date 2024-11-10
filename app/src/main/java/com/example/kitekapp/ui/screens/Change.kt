@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +25,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,29 +33,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.example.kitekapp.DataStoreManager
 import com.example.kitekapp.MyViewModel
-import com.example.kitekapp.Schedules
+import kotlinx.coroutines.launch
 
 @Composable
 fun Change(
     modifier: Modifier = Modifier,
     navController: NavController,
-    vm: MyViewModel
+    vm: MyViewModel,
+    dataStoreManager: DataStoreManager,
 ) {
     Column(
         modifier = modifier
     ) {
         Header(navController, "Выбор расписания")
-        ChangeSchedule(navController = navController, vm)
+        ChangeSchedule(navController = navController, vm, dataStoreManager)
     }
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangeSchedule(navController: NavController, vm: MyViewModel) {
+fun ChangeSchedule(
+    navController: NavController,
+    vm: MyViewModel,
+    dataStoreManager: DataStoreManager,
+) {
 
     var textField by remember { mutableStateOf("") }
     val options = listOf("Преподаватель", "Группа")
@@ -164,18 +173,31 @@ fun ChangeSchedule(navController: NavController, vm: MyViewModel) {
                 items(vm.clients.filter { it.contains(textField, ignoreCase = true) }) { item ->
                     Button(
                         onClick = {
+                            vm.viewModelScope.launch {
+                                dataStoreManager.saveToDataStore(
+                                    com.example.kitekapp.Settings(
+                                        clientName = item
+                                    )
+                                )
+                            }
                             vm.getSchedule(item, "20210411T010000+0600")
                             navController.navigate("main") {
                                 popUpTo("main") { inclusive = true }
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent
+                        ),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
                     ) {
                         Text(
                             text = item,
                             style = MaterialTheme.typography.displayMedium,
                             color = Color.White,
-                            modifier = Modifier
-                                .padding(vertical = 16.dp)
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }

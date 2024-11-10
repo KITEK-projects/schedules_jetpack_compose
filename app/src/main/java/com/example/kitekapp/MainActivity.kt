@@ -1,12 +1,15 @@
 package com.example.kitekapp
 
-import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,7 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,60 +31,116 @@ import com.example.kitekapp.ui.screens.Settings
 import com.example.kitekapp.ui.theme.KITEKAPPTheme
 
 class MainActivity : ComponentActivity() {
-    @SuppressLint("ResourceType")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             KITEKAPPTheme {
-                Navigation()
+
+                val dataStoreContext = LocalContext.current
+
+                val dataStoreManager = DataStoreManager(dataStoreContext)
+
+                Navigation(
+                    dataStoreManager
+                )
             }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    @Composable
-    fun Navigation() {
-        val vm: MyViewModel = viewModel()
+
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun Navigation(
+    dataStoreManager: DataStoreManager
+) {
+    val vm: MyViewModel = viewModel()
+    val settings by dataStoreManager.getFromDataStore().collectAsState(initial = null)
+    if (settings != null) {
         LaunchedEffect(Unit) {
             if (vm.schedule.schedule.isEmpty()) {
-                vm.getSchedule("ОО-31", "20210411T010000+0600")
+                vm.getSchedule(settings!!.clientName, "20210411T010000+0600")
             }
+
         }
+    }
 
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "main") {
 
-                composable("main") {
-                    Main(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background),
-                        navController,
-                        vm = vm
-                    )
-                }
-                composable("change_schedule") {
-                    Change(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background),
-                        navController,
-                        vm
-                    )
-                }
-                composable("settings") {
-                    Settings(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background), navController
-                    )
-                }
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        val navController = rememberNavController()
+        NavHost(navController = navController, startDestination = "main") {
+
+            composable(
+                "main",
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = {it})
+                },
+                exitTransition = {
+                    slideOutHorizontally(targetOffsetX = {it})
+                },
+                popEnterTransition = {
+                    slideInHorizontally(initialOffsetX = {it})
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = {it})
+                },
+            ) {
+                Main(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                    navController,
+                    vm = vm
+                )
+            }
+            composable("change_schedule",
+                enterTransition = {
+                    slideInVertically(initialOffsetY = { it })
+                },
+                exitTransition = {
+                    slideOutVertically(targetOffsetY = {it})
+                },
+                popEnterTransition = {
+                    slideInVertically(initialOffsetY = {it})
+                },
+                popExitTransition = {
+                    slideOutVertically(targetOffsetY = {it})
+                },
+                ) {
+                Change(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                    navController,
+                    vm,
+                    dataStoreManager,
+                )
+            }
+            composable("settings",
+                enterTransition = {
+                    slideInVertically(initialOffsetY = {it})
+                },
+                exitTransition = {
+                    slideOutVertically(targetOffsetY = {it})
+                },
+                popEnterTransition = {
+                    slideInVertically(initialOffsetY = {it})
+                },
+                popExitTransition = {
+                    slideOutVertically(targetOffsetY = {it})
+                },
+                ) {
+                Settings(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background), navController
+                )
             }
         }
     }

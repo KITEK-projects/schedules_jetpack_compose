@@ -58,3 +58,24 @@ fun Header(navController: NavController, text: String) {
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onPrimary)
     }
 }
+
+@Composable
+fun LunchItem() {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "14:45 - 15:35",
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.padding(end = 5.dp)
+        )
+        Text(
+            text = "Обеденный перерыв",
+            style = MaterialTheme.typography.displayMedium,
+            color = Color.White,
+        )
+    }
+}

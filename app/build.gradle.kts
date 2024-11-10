@@ -55,6 +55,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.accompanist.navigation.animation)
+    implementation(libs.accompanist.navigation.animation.v0360)
 
     implementation(libs.logging.interceptor)
     implementation(libs.okhttp)

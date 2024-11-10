@@ -1,21 +1,15 @@
 package com.example.kitekapp
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kitekapp.retrofit2.ClientsApi
 import com.example.kitekapp.retrofit2.ScheduleApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -43,9 +37,16 @@ data class Schedules(
     val schedule: List<Schedule> = emptyList(),
 )
 
+data class Settings(
+    val clientName: String
+)
+
+
+
 class MyViewModel: ViewModel() {
 
-    var schedule by mutableStateOf<Schedules>(Schedules())
+
+    var schedule by mutableStateOf(Schedules())
 
     var error by mutableStateOf<Int?>(null)
     var messageError by mutableStateOf<String?>(null)
@@ -65,7 +66,6 @@ class MyViewModel: ViewModel() {
 
 
     private fun updateSchedules(schedules: Schedules) {
-        Log.d("updateSchedules", "Состояние обновляется: $schedules")
         schedule = schedules
     }
 
@@ -90,17 +90,13 @@ class MyViewModel: ViewModel() {
                 val answer = scheduleApi.getSchedule(client, time)
 
                 if (answer.isSuccessful) {
-                    Log.d("getSchedule", "Запрос успешен: ${answer.body()}")
                     answer.body()?.let { updateSchedules(it) }
-
                     error = null
                 } else {
                     error = answer.code()
-                    Log.d("getSchedule", "Ошибка ответа: ${error}")
                 }
             } catch (e: Exception) {
                 messageError = e.toString()
-                Log.d("getSchedule", "Ошибка запроса: $messageError")
             }
         }
     }
