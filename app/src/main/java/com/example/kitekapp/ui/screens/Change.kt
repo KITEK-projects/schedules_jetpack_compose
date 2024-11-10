@@ -1,6 +1,7 @@
 package com.example.kitekapp.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -21,7 +24,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,37 +32,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.kitekapp.MyViewModel
+import com.example.kitekapp.Schedules
 
 @Composable
-fun Change(modifier: Modifier = Modifier, navController: NavController) {
+fun Change(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    vm: MyViewModel
+) {
     Column(
         modifier = modifier
     ) {
         Header(navController, "Выбор расписания")
-        ChangeSchedule()
+        ChangeSchedule(navController = navController, vm)
     }
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangeSchedule() {
-    val clientList = remember { mutableStateListOf(
-        "KO-21", "ОО-31", "ОО-41", "ПКД-21", "ПКД-22",
-        "ПКД-23", "ПКД-31", "ПКД-32", "ПКД-41", "ПКД-42",
-        "ГД-21", "ГД-31", "ГД-41", "К-21", "К-31",
-        "ТЭ-21", "ТЭ-22", "ТЭ-23", "ТЭ-31", "ТЭ-32",
-        "ТЭ-41", "ТЭ-42", "Б-21", "Б-31", "ИСП-21",
-        "ИСП-31", "ИСП-41", "ИСР-21", "ИСР-31", "ИСР-41",
-        "ПСО-21", "ПСО-31", "ВБ-11", "ГД-11", "ИСП-11",
-        "ИСР-11", "ПКД-11", "ПКД-12", "ПСО-11", "ТЭ-11",
-        "ТЭ-12"
-    )}
+fun ChangeSchedule(navController: NavController, vm: MyViewModel) {
+
     var textField by remember { mutableStateOf("") }
-    var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf("Преподаватель", "Группа")
-    val filteredList = clientList.filter { it.contains(textField, ignoreCase = true) }
+
 
     Column(
         modifier = Modifier
@@ -75,9 +73,15 @@ fun ChangeSchedule() {
             options.forEachIndexed { index, label ->
                 SegmentedButton(
                     shape = RoundedCornerShape(4.dp),
-                    onClick = { selectedIndex = index },
-                    selected = index == selectedIndex,
-                    border = SegmentedButtonDefaults.borderStroke(width = 0.dp, color = Color.Transparent),
+                    onClick = {
+                        vm.selectedIndex = index
+                        vm.updateClients(emptyList())
+                    },
+                    selected = index == vm.selectedIndex,
+                    border = SegmentedButtonDefaults.borderStroke(
+                        width = 0.dp,
+                        color = Color.Transparent
+                    ),
                     colors = SegmentedButtonColors(
                         activeContainerColor = MaterialTheme.colorScheme.onBackground,
                         activeBorderColor = Color.Transparent,
@@ -113,54 +117,80 @@ fun ChangeSchedule() {
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                    TextField(
-                        value = textField,
-                        onValueChange = { textField = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Transparent),
-                        colors = TextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedPlaceholderColor = Color.White,
-                            unfocusedPlaceholderColor = Color.White
-                        ),
-                        textStyle = MaterialTheme.typography.displayMedium,
-                        placeholder = {
-                            if (selectedIndex == 0) {
-                                Text(
-                                    "Введите фамилию",
-                                    color = MaterialTheme.colorScheme.secondary
-                                )
-                            } else {
-                                Text(
-                                    "Введите группу",
-                                    color = MaterialTheme.colorScheme.secondary
-                                )
-                            }
-                        },
-                        singleLine = true,
-                        )
+                TextField(
+                    value = textField,
+                    onValueChange = {
+                        textField = it
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Transparent),
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        cursorColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedPlaceholderColor = Color.White,
+                        unfocusedPlaceholderColor = Color.White
+                    ),
+                    textStyle = MaterialTheme.typography.displayMedium,
+                    placeholder = {
+                        if (vm.selectedIndex == 0) {
+                            Text(
+                                "Введите фамилию",
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        } else {
+                            Text(
+                                "Введите группу",
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                    },
+                    singleLine = true,
+                )
             }
         }
 
-        LazyColumn(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxSize(),
-        ) {
-            items(filteredList) { item ->
-                Text(
-                    text = item,
-                    style = MaterialTheme.typography.displayMedium,
-                    color = Color.White,
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
+        if (vm.clients.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxSize(),
+            ) {
+                items(vm.clients.filter { it.contains(textField, ignoreCase = true) }) { item ->
+                    Button(
+                        onClick = {
+                            vm.getSchedule(item, "20210411T010000+0600")
+                            navController.navigate("main") {
+                                popUpTo("main") { inclusive = true }
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = item,
+                            style = MaterialTheme.typography.displayMedium,
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(vertical = 16.dp)
+                        )
+                    }
+                }
+            }
+        } else {
+            fun Int.toBoolean(): Boolean = this == 0
+            vm.getClients(vm.selectedIndex.toBoolean())
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.secondary,
+                    strokeWidth = 2.5.dp,
                 )
             }
         }

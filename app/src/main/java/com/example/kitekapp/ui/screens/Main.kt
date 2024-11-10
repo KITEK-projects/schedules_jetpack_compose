@@ -1,12 +1,12 @@
 package com.example.kitekapp.ui.screens
 
+import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +32,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,23 +46,23 @@ import com.example.kitekapp.ClassItem
 import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Main(
     modifier: Modifier = Modifier,
     navController: NavController,
-    vm: MyViewModel = viewModel()
+    vm: MyViewModel
 ) {
-    if (vm.schedule != null) {
-        val pagerState = rememberPagerState { vm.schedule!!.schedule.size }
+    if (vm.schedule.client != "None" && vm.schedule.schedule.isNotEmpty()) {
+        val pagerState = rememberPagerState { vm.schedule.schedule.size }
         Column(
             modifier = modifier,
         ) {
-            Header(pagerState = pagerState, navController = navController)
-            Schedule(pagerState = pagerState)
+            Header(pagerState = pagerState, navController = navController, vm=vm)
+            Schedule(pagerState = pagerState, vm = vm)
         }
     } else {
-        vm.getSchedule()
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -68,7 +70,7 @@ fun Main(
         ) {
             if (vm.error == null && vm.messageError == null) {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.secondary,
                     strokeWidth = 2.5.dp,
                 )
             } else {
@@ -80,7 +82,7 @@ fun Main(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Header(vm: MyViewModel = viewModel(), pagerState: PagerState, navController: NavController) {
+fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -107,7 +109,7 @@ fun Header(vm: MyViewModel = viewModel(), pagerState: PagerState, navController:
                     },
             ) {
                 Text(
-                    text = vm.schedule!!.client,
+                    text = vm.schedule.client,
                     style = MaterialTheme.typography.displaySmall,
                     color = Color.White
                 )
@@ -132,8 +134,7 @@ fun Header(vm: MyViewModel = viewModel(), pagerState: PagerState, navController:
 
 
 @Composable
-fun Schedule(vm: MyViewModel = viewModel(), pagerState: PagerState) {
-    val decayAnimationSpec = tween<Float>(durationMillis = 200)
+fun Schedule(vm: MyViewModel, pagerState: PagerState) {
     val snapAnimationSpec = spring(
         stiffness = Spring.StiffnessMedium,
         visibilityThreshold = Int.VisibilityThreshold.toFloat(),
@@ -146,15 +147,16 @@ fun Schedule(vm: MyViewModel = viewModel(), pagerState: PagerState) {
         ) { page ->
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+
                 flingBehavior = PagerDefaults.flingBehavior(
                     state = pagerState,
                     decayAnimationSpec = rememberSplineBasedDecay(),
                     snapAnimationSpec = snapAnimationSpec
                 )
             ) {
-                items(vm.schedule!!.schedule[page].classes) { item ->
+                items(vm.schedule.schedule[page].classes) { item ->
                     if (item.number == 2) {
-                        if (vm.typeClient(vm.schedule!!.client) == "1-2") {
+                        if (vm.typeClient(vm.schedule.client) == "1-2") {
                             Column {
                                 Item(item)
                                 Row(
@@ -176,7 +178,7 @@ fun Schedule(vm: MyViewModel = viewModel(), pagerState: PagerState) {
                                 }
                                 Item(item)
                             }
-                        } else if (vm.typeClient(vm.schedule!!.client) == "3-4") {
+                        } else if (vm.typeClient(vm.schedule.client) == "3-4") {
                             Column {
                                 Item(item)
                                 Row(

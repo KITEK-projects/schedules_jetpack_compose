@@ -39,8 +39,11 @@ fun Header(navController: NavController, text: String) {
             )
             IconButton(
                 onClick = {
-                    navController.navigate("main") {
-                        popUpTo("main") { inclusive = true }
+                    val canGoBack = navController.popBackStack()
+                    if (!canGoBack) {
+                        navController.navigate("main") {
+                            popUpTo("main") { inclusive = true }
+                        }
                     }
                 },
             ) {
