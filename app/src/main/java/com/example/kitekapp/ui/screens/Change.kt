@@ -1,5 +1,7 @@
 package com.example.kitekapp.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,14 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.kitekapp.DataStoreManager
 import com.example.kitekapp.MyViewModel
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Change(
     modifier: Modifier = Modifier,
@@ -57,6 +58,7 @@ fun Change(
 
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangeSchedule(
@@ -66,7 +68,7 @@ fun ChangeSchedule(
 ) {
 
     var textField by remember { mutableStateOf("") }
-    val options = listOf("Преподаватель", "Группа")
+    val options = listOf("Группа", "Преподаватель")
 
 
     Column(
@@ -147,7 +149,7 @@ fun ChangeSchedule(
                     ),
                     textStyle = MaterialTheme.typography.displayMedium,
                     placeholder = {
-                        if (vm.selectedIndex == 0) {
+                        if (vm.selectedIndex == 1) {
                             Text(
                                 "Введите фамилию",
                                 color = MaterialTheme.colorScheme.secondary
@@ -203,7 +205,7 @@ fun ChangeSchedule(
                 }
             }
         } else {
-            fun Int.toBoolean(): Boolean = this == 0
+            fun Int.toBoolean(): Boolean = this == 1
             vm.getClients(vm.selectedIndex.toBoolean())
             Column(
                 modifier = Modifier.fillMaxSize(),

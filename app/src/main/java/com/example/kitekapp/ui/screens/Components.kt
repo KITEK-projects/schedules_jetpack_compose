@@ -1,5 +1,7 @@
 package com.example.kitekapp.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
 
 @Composable
@@ -59,15 +62,17 @@ fun Header(navController: NavController, text: String) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun LunchItem() {
+fun LunchItem(vm: MyViewModel, isSeniorCource: Boolean) {
+    val time: MutableList<List<String>> = vm.calculateSecondLessonAndLunchBreak(false, isSeniorCource)
     Row(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "14:45 - 15:35",
+            text = "${time[0][0]} - ${time[0][1]}",
             style = MaterialTheme.typography.displayMedium,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.padding(end = 5.dp)

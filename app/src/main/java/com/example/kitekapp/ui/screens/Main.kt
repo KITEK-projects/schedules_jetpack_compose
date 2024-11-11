@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
@@ -52,7 +52,7 @@ fun Main(
     navController: NavController,
     vm: MyViewModel
 ) {
-    if (vm.schedule.client != "None" && vm.schedule.schedule.isNotEmpty()) {
+    if (vm.schedule.client != "None" && vm.schedule.schedule.isNotEmpty() && vm.timeItems.isNotEmpty()) {
         val pagerState = rememberPagerState { vm.schedule.schedule.size }
         Column(
             modifier = modifier,
@@ -137,6 +137,7 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Schedule(vm: MyViewModel, pagerState: PagerState) {
     val snapAnimationSpec = spring(
@@ -158,24 +159,66 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState) {
                     snapAnimationSpec = snapAnimationSpec
                 )
             ) {
-                items(vm.schedule.schedule.getOrNull(page)?.classes ?: emptyList()) { item ->
-                    if (item.number == 2) {
-                        Item(item)
-                        LunchItem()
+                itemsIndexed(vm.schedule.schedule.getOrNull(page)?.classes ?: emptyList()) { index, item ->
+
+                    if (vm.schedule.schedule[page].classes.count {it.number == 2} == 2) {
+                        if (item.number == 2 && vm.schedule.schedule[page].classes[index + 1].number > 2) {
+
+                            val isSeniorCource = when(vm.typeClient(vm.schedule.client)) {
+                                "1-2" -> false
+                                "3-4" -> true
+                                "teach" -> when(vm.typeClient(item.partner)) {
+                                    "1-2" -> false
+                                    "3-4" -> true
+
+                                    else -> {false}
+                                }
+
+                                else -> {false}
+                            }
+
+                            Item(item, vm, isSeniorCource)
+                            LunchItem(vm, isSeniorCource)
+                        } else {
+                            Item(item, vm)
+                        }
                     } else {
-                        Item(item)
+                        if (item.number == 2) {
+
+                            val isSeniorCource = when(vm.typeClient(vm.schedule.client)) {
+                                "1-2" -> false
+                                "3-4" -> true
+                                "teach" -> when(vm.typeClient(item.partner)) {
+                                    "1-2" -> false
+                                    "3-4" -> true
+
+                                    else -> {false}
+                                }
+
+                                else -> {false}
+                            }
+
+                            Item(item, vm, isSeniorCource)
+                            LunchItem(vm, isSeniorCource)
+                        } else {
+                            Item(item, vm)
+                        }
                     }
                 }
             }
         }
-
     }
-
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Item(item: ClassItem) {
-
+fun Item(item: ClassItem, vm: MyViewModel, isSeniorCource: Boolean = false) {
+    val time: List<String> = if (item.number == 2) {
+        vm.calculateSecondLessonAndLunchBreak(false, isSeniorCource)[1]
+    } else {
+        vm.getTimeItem(
+            number = item.number,)
+    }
     Row(
         modifier = Modifier
             .padding(horizontal = 14.dp, vertical = 8.dp)
@@ -191,13 +234,13 @@ fun Item(item: ClassItem) {
                 .padding(end = 16.dp),
         ) {
             Text(
-                text = "08:45",
+                text = time[0],
                 style = MaterialTheme.typography.displayLarge,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             Text(
-                text = "10:15",
+                text = time[1],
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.secondary
             )

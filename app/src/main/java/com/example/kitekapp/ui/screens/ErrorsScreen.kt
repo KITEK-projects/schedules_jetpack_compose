@@ -68,32 +68,15 @@ fun ErrorsScreen(
             )
             Text(
                 text = when (vm.error) {
-                    400 -> "Такого клиента нет, ${vm.error}"
-                    404 -> "Нет расписания, ${vm.error}"
-                    500 -> "Ошибка сервера, ${vm.error}"
+                    400 -> "Такого клиента нет"
+                    404 -> "Нет расписания"
+                    500 -> "Ошибка сервера"
                     null -> "Нет подключения, лол)"
                     else -> "${vm.error}, ${vm.messageError}"},
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.secondary,
             )
-
-            IconButton(
-                onClick = {
-                    navController.navigate("change_schedule") {
-                        popUpTo("main")
-                    }
-                },
-                modifier = Modifier.padding(top = 24.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_refresh),
-                    contentDescription = "Right",
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-
         }
     }
 }

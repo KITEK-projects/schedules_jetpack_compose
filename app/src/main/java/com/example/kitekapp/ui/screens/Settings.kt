@@ -85,7 +85,7 @@ fun Screen(navController: NavController) {
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Разрыв пары",
+                text = "Кураторский час",
                 style = MaterialTheme.typography.displayMedium,
                 color = Color.White
             )
