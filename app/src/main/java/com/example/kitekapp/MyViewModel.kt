@@ -16,6 +16,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -40,7 +41,8 @@ data class Schedules(
 )
 
 data class Settings(
-    val clientName: String
+    val clientName: String = "ИСР-21",
+    val isCuratorHour: Boolean = true
 )
 
 
@@ -57,7 +59,7 @@ class MyViewModel : ViewModel() {
 
     var selectedIndex by mutableIntStateOf(0)
 
-    var lessonDuration by mutableIntStateOf(90)
+    var selectLessonDuration by mutableIntStateOf(1)
 
     private val interceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -82,8 +84,10 @@ class MyViewModel : ViewModel() {
         clients = newClients
     }
 
-    private fun updateLessonDiraction(upd: Int) {
-        lessonDuration = upd
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateSelectLessonDuration(upd: Int) {
+        selectLessonDuration = upd
+        updateTimeItems(calculateLessonTimes())
     }
 
     private fun getClient(): OkHttpClient {
@@ -106,12 +110,7 @@ class MyViewModel : ViewModel() {
 
                 if (answer.isSuccessful) {
                     answer.body()?.let { updateSchedules(it) }
-                    if (typeClient(schedule.client) == "teach") {
-                        updateTimeItems(calculateLessonTimes(false, "ИСР-21"))
-                    } else {
-                        updateTimeItems(calculateLessonTimes(false, schedule.client))
-                    }
-
+                    updateTimeItems(calculateLessonTimes())
                     error = null
                 } else {
                     error = answer.code()
@@ -154,6 +153,11 @@ class MyViewModel : ViewModel() {
             return date.format(formatter)
         }
     }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun isMonday(page: Int): Boolean {
+        val date = LocalDate.parse(schedule.schedule[page].date) // 2021-10-11
+        return date.dayOfWeek == DayOfWeek.MONDAY
+    }
 
     fun typeClient(input: String): String {
         if (input.contains('.')) {
@@ -171,16 +175,8 @@ class MyViewModel : ViewModel() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun calculateLessonTimes(
-        isCuratorHour: Boolean,
-        group: String
-    ): MutableList<List<String>> {
-        val digits = group.filter { it.isDigit() }
-        val isSeniorCourse = when (digits.first()) {
-            '1', '2' -> false
-            '3', '4' -> true
-            else -> false
-        }
+    fun calculateLessonTimes(): MutableList<List<String>> {
+
         val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
         var currentTime = LocalTime.parse("08:45", timeFormatter)
 
@@ -192,8 +188,15 @@ class MyViewModel : ViewModel() {
             return listOf(start.format(timeFormatter), end.format(timeFormatter))
         }
 
+        val lessonDirection = when(selectLessonDuration) {
+            0 -> 80
+            1 -> 90
+            2 -> 70
+            else -> 90
+        }
+
         // Первая пара
-        val firstLesson = addLesson(currentTime, lessonDuration)
+        val firstLesson = addLesson(currentTime, lessonDirection)
         schedule.add(firstLesson)
 
         // Вторая пара
@@ -204,22 +207,22 @@ class MyViewModel : ViewModel() {
 
         // Третья пара
         currentTime = LocalTime.parse(firstLesson[1], timeFormatter).plusMinutes(140)
-        val thirdLesson = addLesson(currentTime, lessonDuration)
+        val thirdLesson = addLesson(currentTime, lessonDirection)
         schedule.add(thirdLesson)
 
         // Четвертая пара
         currentTime = LocalTime.parse(thirdLesson[1], timeFormatter).plusMinutes(10)
-        val fourthLesson = addLesson(currentTime, lessonDuration)
+        val fourthLesson = addLesson(currentTime, lessonDirection)
         schedule.add(fourthLesson)
 
         // Пятая пара
         currentTime = LocalTime.parse(fourthLesson[1], timeFormatter).plusMinutes(10)
-        val fifthLesson = addLesson(currentTime, lessonDuration)
+        val fifthLesson = addLesson(currentTime, lessonDirection)
         schedule.add(fifthLesson)
 
         // Шестая пара
         currentTime = LocalTime.parse(fifthLesson[1], timeFormatter).plusMinutes(5)
-        val sixthLesson = addLesson(currentTime, lessonDuration)
+        val sixthLesson = addLesson(currentTime, lessonDirection)
         schedule.add(sixthLesson)
 
         return schedule
@@ -229,22 +232,34 @@ class MyViewModel : ViewModel() {
     @RequiresApi(Build.VERSION_CODES.O)
     fun calculateSecondLessonAndLunchBreak(
         isCuratorHour: Boolean,
-        isSeniorCourse: Boolean,
+        isSeniorCourse: Boolean
     ): MutableList<List<String>> {
         val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
         val schedule = mutableListOf(
             listOf("", ""),
             listOf("", "")
         )
+
+        val lessonDirection = when(selectLessonDuration) {
+            0 -> 80
+            1 -> 90
+            2 -> 70
+            else -> 90
+        }
+
         // Первая пара из списка
         val firstLessonEnd = LocalTime.parse(timeItems[1][1], timeFormatter)
 
         // Начало второй пары (конец первой пары + 10 минут + кураторский час)
         var secondLessonStart = firstLessonEnd.plusMinutes(10)
-        if (isCuratorHour) secondLessonStart = secondLessonStart.plusMinutes(35)
+        if (isCuratorHour) {
+            secondLessonStart = secondLessonStart.plusMinutes(40)
+        }
 
         // Продолжительность второй пары
-        val secondLessonDuration = if (isSeniorCourse) lessonDuration else lessonDuration + 30
+        var secondLessonDuration = if (isSeniorCourse) lessonDirection else lessonDirection + 30
+        secondLessonDuration = if (isCuratorHour) secondLessonDuration + 5 else lessonDirection
+
         val secondLesson = listOf(
             secondLessonStart.format(timeFormatter),
             secondLessonStart.plusMinutes(secondLessonDuration.toLong()).format(timeFormatter)
@@ -255,7 +270,8 @@ class MyViewModel : ViewModel() {
         val lunchStart = secondLessonStart.plusMinutes(45)
         val adjustedLunchStart = if (isSeniorCourse) lunchStart.plusMinutes(45) else lunchStart
         val lunchEnd = adjustedLunchStart.plusMinutes(30)
-        val adjustedLunchEnd = if (isSeniorCourse) lunchEnd.plusMinutes(10) else lunchEnd
+        var adjustedLunchEnd = if (isSeniorCourse) lunchEnd.plusMinutes(10) else lunchEnd
+        adjustedLunchEnd = if (isCuratorHour) adjustedLunchEnd.plusMinutes(5) else adjustedLunchEnd
         schedule[0] = listOf(adjustedLunchStart.format(timeFormatter), adjustedLunchEnd.format(timeFormatter))
 
         return schedule

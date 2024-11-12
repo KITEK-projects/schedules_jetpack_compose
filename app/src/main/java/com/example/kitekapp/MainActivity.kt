@@ -69,6 +69,7 @@ fun Navigation(
     }
 
 
+
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = "main") {
@@ -94,7 +95,8 @@ fun Navigation(
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background),
                     navController,
-                    vm = vm
+                    vm,
+                    settings
                 )
             }
             composable("change_schedule",
@@ -119,6 +121,7 @@ fun Navigation(
                     navController,
                     vm,
                     dataStoreManager,
+                    settings
                 )
             }
             composable("settings",
@@ -139,7 +142,11 @@ fun Navigation(
                     modifier = Modifier
                         .padding(innerPadding)
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background), navController
+                        .background(MaterialTheme.colorScheme.background),
+                    navController,
+                    vm,
+                    dataStoreManager,
+                    settings
                 )
             }
         }

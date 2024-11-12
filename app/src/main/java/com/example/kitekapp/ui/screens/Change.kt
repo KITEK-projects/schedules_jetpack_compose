@@ -39,6 +39,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.kitekapp.DataStoreManager
 import com.example.kitekapp.MyViewModel
+import com.example.kitekapp.Settings
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -48,12 +49,13 @@ fun Change(
     navController: NavController,
     vm: MyViewModel,
     dataStoreManager: DataStoreManager,
+    settings: Settings?,
 ) {
     Column(
         modifier = modifier
     ) {
         Header(navController, "Выбор расписания")
-        ChangeSchedule(navController = navController, vm, dataStoreManager)
+        ChangeSchedule(navController = navController, vm, dataStoreManager, settings)
     }
 
 }
@@ -65,6 +67,7 @@ fun ChangeSchedule(
     navController: NavController,
     vm: MyViewModel,
     dataStoreManager: DataStoreManager,
+    settings: Settings?,
 ) {
 
     var textField by remember { mutableStateOf("") }
@@ -176,11 +179,14 @@ fun ChangeSchedule(
                     Button(
                         onClick = {
                             vm.viewModelScope.launch {
-                                dataStoreManager.saveToDataStore(
-                                    com.example.kitekapp.Settings(
-                                        clientName = item
+                                if (settings != null) {
+                                    dataStoreManager.saveToDataStore(
+                                        Settings(
+                                            clientName = item,
+                                            isCuratorHour = settings.isCuratorHour
+                                        )
                                     )
-                                )
+                                }
                             }
                             vm.getSchedule(item, "20210411T010000+0600")
                             navController.navigate("main") {
@@ -191,6 +197,7 @@ fun ChangeSchedule(
                             containerColor = Color.Transparent,
                             disabledContainerColor = Color.Transparent
                         ),
+                        shape = RoundedCornerShape(4.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
                         modifier = Modifier
                             .fillMaxWidth()

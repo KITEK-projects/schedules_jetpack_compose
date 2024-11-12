@@ -1,5 +1,7 @@
 package com.example.kitekapp.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,36 +21,47 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.example.kitekapp.DataStoreManager
+import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
+import com.example.kitekapp.Settings
+import kotlinx.coroutines.launch
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Settings(modifier: Modifier = Modifier, navController: NavController) {
+fun Settings(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    vm: MyViewModel,
+    dataStoreManager: DataStoreManager,
+    settings: Settings?,
+) {
     Column(
         modifier = modifier
     ) {
         Header(navController, "Настройки")
-        Screen(navController)
+        Screen(navController, vm, dataStoreManager, settings)
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Screen(navController: NavController) {
-    var selectedIndex by remember { mutableIntStateOf(1) }
+fun Screen(
+    navController: NavController,
+    vm: MyViewModel,
+    dataStoreManager: DataStoreManager,
+    settings: Settings?
+) {
     val options = listOf("1:20", "1:30", "1:10")
-    val checkedState = remember { mutableStateOf(true) }
     Column {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,22 +98,38 @@ fun Screen(navController: NavController) {
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Кураторский час",
+                text = "Кураторскиe часы по пн.",
                 style = MaterialTheme.typography.displayMedium,
                 color = Color.White
             )
-            Switch(
-                checked = checkedState.value,
-                onCheckedChange = { checkedState.value = it },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = MaterialTheme.colorScheme.onBackground,
-                    checkedBorderColor = Color.Transparent,
-                    uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
-                    uncheckedBorderColor = Color.Transparent,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.onBackground
-                ),
+            Text(
+                text = "СЛОМАНЫ",
+                style = MaterialTheme.typography.displaySmall,
+                color = Color.Gray
             )
+            if (settings != null) {
+                Switch(
+                    checked = settings.isCuratorHour,
+                    onCheckedChange = {
+                        vm.viewModelScope.launch {
+                            dataStoreManager.saveToDataStore(
+                                Settings(
+                                    clientName = settings.clientName,
+                                    isCuratorHour = it
+                                )
+                            )
+                        }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = MaterialTheme.colorScheme.onBackground,
+                        checkedBorderColor = Color.Transparent,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
+                        uncheckedBorderColor = Color.Transparent,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.onBackground
+                    ),
+                )
+            }
         }
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier
@@ -110,8 +139,13 @@ fun Screen(navController: NavController) {
             options.forEachIndexed { index, label ->
                 SegmentedButton(
                     shape = RoundedCornerShape(4.dp),
-                    onClick = { selectedIndex = index },
-                    selected = index == selectedIndex,
+                    onClick = {
+                        vm.updateSelectLessonDuration(index)
+                        navController.navigate("main") {
+                            popUpTo("main") { inclusive = true }
+                        }
+                    },
+                    selected = index == vm.selectLessonDuration,
                     border = SegmentedButtonDefaults.borderStroke(width = 0.dp, color = Color.Transparent),
                     colors = SegmentedButtonColors(
                         activeContainerColor = MaterialTheme.colorScheme.onBackground,

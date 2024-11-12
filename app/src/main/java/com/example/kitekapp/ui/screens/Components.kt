@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
+import com.example.kitekapp.Settings
 
 @Composable
 fun Header(navController: NavController, text: String) {
@@ -64,8 +65,13 @@ fun Header(navController: NavController, text: String) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun LunchItem(vm: MyViewModel, isSeniorCource: Boolean) {
-    val time: MutableList<List<String>> = vm.calculateSecondLessonAndLunchBreak(false, isSeniorCource)
+fun LunchItem(
+    vm: MyViewModel,
+    isSeniorCourse: Boolean,
+    settings: Settings?,
+    isMonday: Boolean
+) {
+    val time: MutableList<List<String>> = vm.calculateSecondLessonAndLunchBreak(settings!!.isCuratorHour && isMonday, isSeniorCourse)
     Row(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 16.dp),
