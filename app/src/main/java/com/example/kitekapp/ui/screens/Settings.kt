@@ -2,6 +2,7 @@ package com.example.kitekapp.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +29,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.kitekapp.DataStoreManager
 import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
 import com.example.kitekapp.Settings
@@ -41,14 +41,13 @@ fun Settings(
     modifier: Modifier = Modifier,
     navController: NavController,
     vm: MyViewModel,
-    dataStoreManager: DataStoreManager,
     settings: Settings?,
 ) {
     Column(
         modifier = modifier
     ) {
         Header(navController, "Настройки")
-        Screen(navController, vm, dataStoreManager, settings)
+        Screen(navController, vm, settings)
     }
 }
 
@@ -58,7 +57,6 @@ fun Settings(
 fun Screen(
     navController: NavController,
     vm: MyViewModel,
-    dataStoreManager: DataStoreManager,
     settings: Settings?
 ) {
     val options = listOf("1:20", "1:30", "1:10")
@@ -69,6 +67,11 @@ fun Screen(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 5.dp)
                 .fillMaxWidth()
+                .clickable {
+                    navController.navigate("change_schedule") {
+                        popUpTo("main")
+                    }
+                }
         ) {
             Text(
                 text = "Выбор расписания",
@@ -102,17 +105,12 @@ fun Screen(
                 style = MaterialTheme.typography.displayMedium,
                 color = Color.White
             )
-            Text(
-                text = "СЛОМАНЫ",
-                style = MaterialTheme.typography.displaySmall,
-                color = Color.Gray
-            )
             if (settings != null) {
                 Switch(
                     checked = settings.isCuratorHour,
                     onCheckedChange = {
                         vm.viewModelScope.launch {
-                            dataStoreManager.saveToDataStore(
+                            vm.saveSettings(
                                 Settings(
                                     clientName = settings.clientName,
                                     isCuratorHour = it

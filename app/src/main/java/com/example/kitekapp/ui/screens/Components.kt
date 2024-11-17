@@ -20,9 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
-import com.example.kitekapp.Settings
 
 @Composable
 fun Header(navController: NavController, text: String) {
@@ -66,19 +64,14 @@ fun Header(navController: NavController, text: String) {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LunchItem(
-    vm: MyViewModel,
-    isSeniorCourse: Boolean,
-    settings: Settings?,
-    isMonday: Boolean
 ) {
-    val time: MutableList<List<String>> = vm.calculateSecondLessonAndLunchBreak(settings!!.isCuratorHour && isMonday, isSeniorCourse)
     Row(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "${time[0][0]} - ${time[0][1]}",
+            text = "None",
             style = MaterialTheme.typography.displayMedium,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.padding(end = 5.dp)

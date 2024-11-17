@@ -37,14 +37,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             KITEKAPPTheme {
-
-                val dataStoreContext = LocalContext.current
-
-                val dataStoreManager = DataStoreManager(dataStoreContext)
-
-                Navigation(
-                    dataStoreManager
-                )
+                Navigation()
             }
         }
     }
@@ -54,11 +47,12 @@ class MainActivity : ComponentActivity() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Navigation(
-    dataStoreManager: DataStoreManager
-) {
-    val vm: MyViewModel = viewModel()
-    val settings by dataStoreManager.getFromDataStore().collectAsState(initial = null)
+fun Navigation() {
+    val dataStoreManager = DataStoreManager(LocalContext.current)
+    val vm: MyViewModel = viewModel(
+        factory = MyViewModelFactory(dataStoreManager)
+    )
+    val settings by vm.settings.collectAsState()
     if (settings != null) {
         LaunchedEffect(Unit) {
             if (vm.schedule.schedule.isEmpty()) {
@@ -96,7 +90,6 @@ fun Navigation(
                         .background(MaterialTheme.colorScheme.background),
                     navController,
                     vm,
-                    settings
                 )
             }
             composable("change_schedule",
@@ -120,7 +113,6 @@ fun Navigation(
                         .background(MaterialTheme.colorScheme.background),
                     navController,
                     vm,
-                    dataStoreManager,
                     settings
                 )
             }
@@ -145,7 +137,6 @@ fun Navigation(
                         .background(MaterialTheme.colorScheme.background),
                     navController,
                     vm,
-                    dataStoreManager,
                     settings
                 )
             }

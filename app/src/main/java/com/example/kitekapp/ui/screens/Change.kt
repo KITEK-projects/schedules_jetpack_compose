@@ -37,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.kitekapp.DataStoreManager
 import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.Settings
 import kotlinx.coroutines.launch
@@ -48,14 +47,13 @@ fun Change(
     modifier: Modifier = Modifier,
     navController: NavController,
     vm: MyViewModel,
-    dataStoreManager: DataStoreManager,
     settings: Settings?,
 ) {
     Column(
         modifier = modifier
     ) {
         Header(navController, "Выбор расписания")
-        ChangeSchedule(navController = navController, vm, dataStoreManager, settings)
+        ChangeSchedule(navController = navController, vm, settings)
     }
 
 }
@@ -66,7 +64,6 @@ fun Change(
 fun ChangeSchedule(
     navController: NavController,
     vm: MyViewModel,
-    dataStoreManager: DataStoreManager,
     settings: Settings?,
 ) {
 
@@ -180,7 +177,7 @@ fun ChangeSchedule(
                         onClick = {
                             vm.viewModelScope.launch {
                                 if (settings != null) {
-                                    dataStoreManager.saveToDataStore(
+                                    vm.saveSettings(
                                         Settings(
                                             clientName = item,
                                             isCuratorHour = settings.isCuratorHour

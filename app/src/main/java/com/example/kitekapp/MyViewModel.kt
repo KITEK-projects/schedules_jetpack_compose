@@ -4,13 +4,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kitekapp.retrofit2.ClientsApi
 import com.example.kitekapp.retrofit2.ScheduleApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -23,6 +24,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 data class ClassItem(
+    val time: List<String>,
     val number: Int,
     val title: String,
     val type: String,
@@ -46,7 +48,31 @@ data class Settings(
 )
 
 
-class MyViewModel : ViewModel() {
+class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
+
+    private val _settings = MutableStateFlow<Settings?>(null)
+    val settings: StateFlow<Settings?> get() = _settings
+
+    init {
+        loadSettings()
+    }
+
+    private fun loadSettings() {
+        viewModelScope.launch {
+            dataStoreManager.getFromDataStore()
+                .collect { settings ->
+                    _settings.value = settings
+                }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun saveSettings(settings: Settings) {
+        viewModelScope.launch {
+            dataStoreManager.saveToDataStore(settings)
+            updateTime(schedule)
+        }
+    }
 
 
     var schedule by mutableStateOf(Schedules())
@@ -69,15 +95,8 @@ class MyViewModel : ViewModel() {
         .addInterceptor(interceptor)
         .build()
 
-    var timeItems = mutableStateListOf<List<String>>()
-
     private fun updateSchedules(schedules: Schedules) {
         schedule = schedules
-    }
-
-    private fun updateTimeItems(time: List<List<String>>) {
-        timeItems.clear()
-        timeItems.addAll(time)
     }
 
     fun updateClients(newClients: List<String>) {
@@ -87,7 +106,7 @@ class MyViewModel : ViewModel() {
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateSelectLessonDuration(upd: Int) {
         selectLessonDuration = upd
-        updateTimeItems(calculateLessonTimes())
+        updateTime(schedule)
     }
 
     private fun getClient(): OkHttpClient {
@@ -103,21 +122,52 @@ class MyViewModel : ViewModel() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getSchedule(client: String, time: String) {
-        updateSchedules(Schedules())
+        updateSchedules(Schedules()) // Сбрасываем текущее расписание
         viewModelScope.launch {
             try {
                 val answer = scheduleApi.getSchedule(client, time)
 
                 if (answer.isSuccessful) {
-                    answer.body()?.let { updateSchedules(it) }
-                    updateTimeItems(calculateLessonTimes())
-                    error = null
+                    answer.body()?.let { responseSchedule ->
+                        updateTime(responseSchedule)
+                        error = null
+                    }
                 } else {
                     error = answer.code()
                 }
             } catch (e: Exception) {
                 messageError = e.toString()
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateTime(schedules: Schedules) {
+        viewModelScope.launch {
+            val updatedSchedules = schedules.schedule.map { lschedule ->
+                val updatedClasses = lschedule.classes.map { classItem ->
+                    val generatedTime = calculateLessonSchedule(
+                        classItem.number,
+                        isCuratorHour = if (_settings.value?.isCuratorHour == true) isMonday(lschedule.date) else false,
+                        isSeniorCourse = when (typeClient(schedules.client)) {
+                            "teach" -> when (typeClient(classItem.partner)) {
+                                "1-2" -> false
+                                "3-4" -> true
+                                else -> false
+                            }
+
+                            "1-2" -> false
+                            "3-4" -> true
+                            else -> false
+                        }
+                    )
+                    classItem.copy(time = generatedTime)
+                }
+                Schedule(lschedule.date, updatedClasses)
+            }
+
+            // Обновляем глобальное расписание
+            updateSchedules(Schedules(schedules.client, updatedSchedules))
         }
     }
 
@@ -153,10 +203,11 @@ class MyViewModel : ViewModel() {
             return date.format(formatter)
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.O)
-    fun isMonday(page: Int): Boolean {
-        val date = LocalDate.parse(schedule.schedule[page].date) // 2021-10-11
-        return date.dayOfWeek == DayOfWeek.MONDAY
+    fun isMonday(date: String): Boolean {
+        val ldate = LocalDate.parse(date) // 2021-10-11
+        return ldate.dayOfWeek == DayOfWeek.MONDAY
     }
 
     fun typeClient(input: String): String {
@@ -175,122 +226,101 @@ class MyViewModel : ViewModel() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun calculateLessonTimes(): MutableList<List<String>> {
+    fun calculateLessonSchedule(
+        number: Int,
+        isCuratorHour: Boolean = true, // Есть ли кураторский час
+        isSeniorCourse: Boolean = true // "3-4" курс
+    ): List<String> {
+
+        val lessonDuration = when (selectLessonDuration) {
+            0 -> 80
+            1 -> 90
+            2 -> 70
+            else -> 90
+        }
 
         val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        var currentTime = LocalTime.parse("08:45", timeFormatter)
 
+        // Начальное время первой пары
+        var currentTime = LocalTime.of(8, 45)
+
+        // Список для результатов
         val schedule = mutableListOf<List<String>>()
 
-        // Функция для добавления временных промежутков пары
-        fun addLesson(start: LocalTime, duration: Int): List<String> {
-            val end = start.plusMinutes(duration.toLong())
-            return listOf(start.format(timeFormatter), end.format(timeFormatter))
-        }
+        // Добавляем первую пару
+        val firstLessonEnd = currentTime.plusMinutes(lessonDuration.toLong())
+        schedule.add(
+            listOf(
+                currentTime.format(timeFormatter),
+                firstLessonEnd.format(timeFormatter)
+            )
+        )
+        currentTime = firstLessonEnd.plusMinutes(10) // Время до второй пары
 
-        val lessonDirection = when(selectLessonDuration) {
-            0 -> 80
-            1 -> 90
-            2 -> 70
-            else -> 90
+        // Добавляем кураторский час, если есть
+        if (isCuratorHour) {
+            currentTime = currentTime.plusMinutes(40)
         }
-
-        // Первая пара
-        val firstLesson = addLesson(currentTime, lessonDirection)
-        schedule.add(firstLesson)
 
         // Вторая пара
-        schedule.add(listOf("", ""))
+        val secondLessonEnd =
+            currentTime.plusMinutes(
+                lessonDuration.toLong()
+                        + if (!isSeniorCourse) if (isCuratorHour) 35 else 30 else 0)
+        schedule.add(
+            listOf(
+                currentTime.format(timeFormatter),
+                secondLessonEnd.format(timeFormatter)
+            )
+        )
 
         // Обеденный перерыв
-        schedule.add(0, listOf("", ""))
+        val lunchStart = secondLessonEnd.plusMinutes((45 + if (isSeniorCourse) 35 else 0).toLong())
+        val lunchEnd = lunchStart.plusMinutes(30)
+        schedule.add(0, listOf(lunchStart.format(timeFormatter), lunchEnd.format(timeFormatter)))
 
         // Третья пара
-        currentTime = LocalTime.parse(firstLesson[1], timeFormatter).plusMinutes(140)
-        val thirdLesson = addLesson(currentTime, lessonDirection)
-        schedule.add(thirdLesson)
+        currentTime =
+            secondLessonEnd.plusMinutes((10 + if (isSeniorCourse) 30 + if (isCuratorHour) 5 else 0 else 0).toLong())
+        val thirdLessonEnd = currentTime.plusMinutes(lessonDuration.toLong())
+        schedule.add(
+            listOf(
+                currentTime.format(timeFormatter),
+                thirdLessonEnd.format(timeFormatter)
+            )
+        )
 
         // Четвертая пара
-        currentTime = LocalTime.parse(thirdLesson[1], timeFormatter).plusMinutes(10)
-        val fourthLesson = addLesson(currentTime, lessonDirection)
-        schedule.add(fourthLesson)
+        currentTime = thirdLessonEnd.plusMinutes(10)
+        val fourthLessonEnd = currentTime.plusMinutes(lessonDuration.toLong())
+        schedule.add(
+            listOf(
+                currentTime.format(timeFormatter),
+                fourthLessonEnd.format(timeFormatter)
+            )
+        )
 
         // Пятая пара
-        currentTime = LocalTime.parse(fourthLesson[1], timeFormatter).plusMinutes(10)
-        val fifthLesson = addLesson(currentTime, lessonDirection)
-        schedule.add(fifthLesson)
+        currentTime = fourthLessonEnd.plusMinutes(10)
+        val fifthLessonEnd = currentTime.plusMinutes(lessonDuration.toLong())
+        schedule.add(
+            listOf(
+                currentTime.format(timeFormatter),
+                fifthLessonEnd.format(timeFormatter)
+            )
+        )
 
         // Шестая пара
-        currentTime = LocalTime.parse(fifthLesson[1], timeFormatter).plusMinutes(5)
-        val sixthLesson = addLesson(currentTime, lessonDirection)
-        schedule.add(sixthLesson)
-
-        return schedule
-    }
-
-    // Функция для вычисления второй пары и обеденного перерыва
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun calculateSecondLessonAndLunchBreak(
-        isCuratorHour: Boolean,
-        isSeniorCourse: Boolean
-    ): MutableList<List<String>> {
-        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        val schedule = mutableListOf(
-            listOf("", ""),
-            listOf("", "")
+        currentTime = fifthLessonEnd.plusMinutes(5)
+        val sixthLessonEnd = currentTime.plusMinutes(lessonDuration.toLong())
+        schedule.add(
+            listOf(
+                currentTime.format(timeFormatter),
+                sixthLessonEnd.format(timeFormatter)
+            )
         )
 
-        val lessonDirection = when(selectLessonDuration) {
-            0 -> 80
-            1 -> 90
-            2 -> 70
-            else -> 90
-        }
-
-        // Первая пара из списка
-        val firstLessonEnd = LocalTime.parse(timeItems[1][1], timeFormatter)
-
-        // Начало второй пары (конец первой пары + 10 минут + кураторский час)
-        var secondLessonStart = firstLessonEnd.plusMinutes(10)
-        if (isCuratorHour) {
-            secondLessonStart = secondLessonStart.plusMinutes(40)
-        }
-
-        // Продолжительность второй пары
-        var secondLessonDuration = if (isSeniorCourse) lessonDirection else lessonDirection + 30
-        secondLessonDuration = if (isCuratorHour) secondLessonDuration + 5 else lessonDirection
-
-        val secondLesson = listOf(
-            secondLessonStart.format(timeFormatter),
-            secondLessonStart.plusMinutes(secondLessonDuration.toLong()).format(timeFormatter)
-        )
-        schedule[1] = secondLesson // Заменяем временное значение
-
-        // Обеденный перерыв
-        val lunchStart = secondLessonStart.plusMinutes(45)
-        val adjustedLunchStart = if (isSeniorCourse) lunchStart.plusMinutes(45) else lunchStart
-        val lunchEnd = adjustedLunchStart.plusMinutes(30)
-        var adjustedLunchEnd = if (isSeniorCourse) lunchEnd.plusMinutes(10) else lunchEnd
-        adjustedLunchEnd = if (isCuratorHour) adjustedLunchEnd.plusMinutes(5) else adjustedLunchEnd
-        schedule[0] = listOf(adjustedLunchStart.format(timeFormatter), adjustedLunchEnd.format(timeFormatter))
-
-        return schedule
-    }
-
-
-
-    fun getTimeItem(number: Int): List<String> {
-        return when (number) {
-            1 -> timeItems[1]
-            2 -> timeItems[2]
-            3 -> timeItems[3]
-            4 -> timeItems[4]
-            5 -> timeItems[5]
-            6 -> timeItems[6]
-            else -> {
-                timeItems[0]
-            }
-        }
+        return schedule[number]
     }
 
 //    fun getLessonTime(client: String): LessonTime {

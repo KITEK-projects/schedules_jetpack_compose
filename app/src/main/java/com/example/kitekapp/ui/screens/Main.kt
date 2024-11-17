@@ -43,7 +43,6 @@ import androidx.navigation.NavController
 import com.example.kitekapp.ClassItem
 import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
-import com.example.kitekapp.Settings
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -52,15 +51,14 @@ fun Main(
     modifier: Modifier = Modifier,
     navController: NavController,
     vm: MyViewModel,
-    settings: Settings?
 ) {
-    if (vm.schedule.client != "None" && vm.schedule.schedule.isNotEmpty() && vm.timeItems.isNotEmpty()) {
+    if (vm.schedule.client != "None" && vm.schedule.schedule.isNotEmpty()) {
         val pagerState = rememberPagerState { vm.schedule.schedule.size }
         Column(
             modifier = modifier,
         ) {
             Header(pagerState = pagerState, navController = navController, vm=vm)
-            Schedule(pagerState = pagerState, vm = vm, settings = settings)
+            Schedule(pagerState = pagerState, vm = vm)
         }
     } else {
         Column(
@@ -141,7 +139,7 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Schedule(vm: MyViewModel, pagerState: PagerState, settings: Settings?) {
+fun Schedule(vm: MyViewModel, pagerState: PagerState) {
     val snapAnimationSpec = spring(
         stiffness = Spring.StiffnessMedium,
         visibilityThreshold = Int.VisibilityThreshold.toFloat(),
@@ -166,44 +164,18 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState, settings: Settings?) {
                     if (vm.schedule.schedule[page].classes.count {it.number == 2} == 2) {
                         if (item.number == 2 && vm.schedule.schedule[page].classes[index + 1].number > 2) {
 
-                            val isSeniorCource = when(vm.typeClient(vm.schedule.client)) {
-                                "1-2" -> false
-                                "3-4" -> true
-                                "teach" -> when(vm.typeClient(item.partner)) {
-                                    "1-2" -> false
-                                    "3-4" -> true
-
-                                    else -> {false}
-                                }
-
-                                else -> {false}
-                            }
-
-                            Item(item, vm, isSeniorCource, settings, vm.isMonday(pagerState.currentPage))
-                            LunchItem(vm, isSeniorCource, settings, vm.isMonday(pagerState.currentPage))
+                            Item(item)
+                            LunchItem()
                         } else {
-                            Item(item, vm, settings = settings, isMonday = vm.isMonday(pagerState.currentPage))
+                            Item(item)
                         }
                     } else {
                         if (item.number == 2) {
 
-                            val isSeniorCource = when(vm.typeClient(vm.schedule.client)) {
-                                "1-2" -> false
-                                "3-4" -> true
-                                "teach" -> when(vm.typeClient(item.partner)) {
-                                    "1-2" -> false
-                                    "3-4" -> true
-
-                                    else -> {false}
-                                }
-
-                                else -> {false}
-                            }
-
-                            Item(item, vm, isSeniorCource, settings, vm.isMonday(pagerState.currentPage))
-                            LunchItem(vm, isSeniorCource, settings, vm.isMonday(pagerState.currentPage))
+                            Item(item)
+                            LunchItem()
                         } else {
-                            Item(item, vm, settings = settings, isMonday = vm.isMonday(pagerState.currentPage))
+                            Item(item)
                         }
                     }
                 }
@@ -216,17 +188,7 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState, settings: Settings?) {
 @Composable
 fun Item(
     item: ClassItem,
-    vm: MyViewModel,
-    isSeniorCource: Boolean = false,
-    settings: Settings?,
-    isMonday: Boolean
 ) {
-    val time: List<String> = if (item.number == 2) {
-        vm.calculateSecondLessonAndLunchBreak(settings!!.isCuratorHour && isMonday, isSeniorCource)[1]
-    } else {
-        vm.getTimeItem(
-            number = item.number,)
-    }
     Row(
         modifier = Modifier
             .padding(horizontal = 14.dp, vertical = 8.dp)
@@ -242,13 +204,13 @@ fun Item(
                 .padding(end = 16.dp),
         ) {
             Text(
-                text = time[0],
+                text = item.time[0],
                 style = MaterialTheme.typography.displayLarge,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             Text(
-                text = time[1],
+                text = item.time[1],
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.secondary
             )
