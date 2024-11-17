@@ -20,6 +20,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -43,7 +44,7 @@ data class Schedules(
 )
 
 data class Settings(
-    val clientName: String = "ИСР-21",
+    val clientName: String = "",
     val isCuratorHour: Boolean = true
 )
 
@@ -121,11 +122,15 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
     private val clientsApi = retrofit.create(ClientsApi::class.java)
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getSchedule(client: String, time: String) {
+    fun getSchedule(client: String) {
         updateSchedules(Schedules()) // Сбрасываем текущее расписание
         viewModelScope.launch {
             try {
-                val answer = scheduleApi.getSchedule(client, time)
+                val answer = scheduleApi.getSchedule(
+                    client,
+                    LocalDate.now().minusDays(1).atStartOfDay(ZoneOffset.UTC).format(
+                        DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                )
 
                 if (answer.isSuccessful) {
                     answer.body()?.let { responseSchedule ->
@@ -147,7 +152,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
             val updatedSchedules = schedules.schedule.map { lschedule ->
                 val updatedClasses = lschedule.classes.map { classItem ->
                     val generatedTime = calculateLessonSchedule(
-                        classItem.number,
+                        classItem.number - 1,
                         isCuratorHour = if (_settings.value?.isCuratorHour == true) isMonday(lschedule.date) else false,
                         isSeniorCourse = when (typeClient(schedules.client)) {
                             "teach" -> when (typeClient(classItem.partner)) {
@@ -274,10 +279,6 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
             )
         )
 
-        // Обеденный перерыв
-        val lunchStart = secondLessonEnd.plusMinutes((45 + if (isSeniorCourse) 35 else 0).toLong())
-        val lunchEnd = lunchStart.plusMinutes(30)
-        schedule.add(0, listOf(lunchStart.format(timeFormatter), lunchEnd.format(timeFormatter)))
 
         // Третья пара
         currentTime =

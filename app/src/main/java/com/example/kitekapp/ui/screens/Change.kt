@@ -185,7 +185,7 @@ fun ChangeSchedule(
                                     )
                                 }
                             }
-                            vm.getSchedule(item, "20210411T010000+0600")
+                            vm.getSchedule(item)
                             navController.navigate("main") {
                                 popUpTo("main") { inclusive = true }
                             }

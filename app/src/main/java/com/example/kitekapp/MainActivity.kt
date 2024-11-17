@@ -56,9 +56,9 @@ fun Navigation() {
     if (settings != null) {
         LaunchedEffect(Unit) {
             if (vm.schedule.schedule.isEmpty()) {
-                vm.getSchedule(settings!!.clientName, "20210411T010000+0600")
+                if (settings!!.clientName != "")
+                    vm.getSchedule(settings!!.clientName)
             }
-
         }
     }
 

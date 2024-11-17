@@ -27,7 +27,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,22 +56,19 @@ fun Main(
         Column(
             modifier = modifier,
         ) {
-            Header(pagerState = pagerState, navController = navController, vm=vm)
+            Header(pagerState = pagerState, navController = navController, vm = vm)
             Schedule(pagerState = pagerState, vm = vm)
         }
     } else {
-        Column(
-            modifier = modifier,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            if (vm.error == null && vm.messageError == null) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.secondary,
-                    strokeWidth = 2.5.dp,
-                )
+        if (vm.settings.value != null) {
+            if (vm.settings.value!!.clientName == "") {
+                FirstStart(navController)
             } else {
-                ErrorsScreen(vm = vm, navController = navController)
+                if (vm.error == null && vm.messageError == null) {
+                    IsLoading()
+                } else {
+                    ErrorsScreen(vm = vm, navController = navController)
+                }
             }
         }
     }
@@ -159,13 +155,15 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState) {
                     snapAnimationSpec = snapAnimationSpec
                 )
             ) {
-                itemsIndexed(vm.schedule.schedule.getOrNull(page)?.classes ?: emptyList()) { index, item ->
+                itemsIndexed(
+                    vm.schedule.schedule.getOrNull(page)?.classes ?: emptyList()
+                ) { index, item ->
 
-                    if (vm.schedule.schedule[page].classes.count {it.number == 2} == 2) {
+                    if (vm.schedule.schedule[page].classes.count { it.number == 2 } == 2) {
                         if (item.number == 2 && vm.schedule.schedule[page].classes[index + 1].number > 2) {
 
                             Item(item)
-                            LunchItem()
+                            LunchItem(item, vm, vm.schedule.schedule[index].date)
                         } else {
                             Item(item)
                         }
@@ -173,7 +171,7 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState) {
                         if (item.number == 2) {
 
                             Item(item)
-                            LunchItem()
+                            LunchItem(item, vm, vm.schedule.schedule[page].date)
                         } else {
                             Item(item)
                         }
