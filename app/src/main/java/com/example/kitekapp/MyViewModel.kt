@@ -128,8 +128,9 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
             try {
                 val answer = scheduleApi.getSchedule(
                     client,
-                    LocalDate.now().minusDays(1).atStartOfDay(ZoneOffset.UTC).format(
+                    LocalDate.now().atStartOfDay(ZoneOffset.UTC).format(
                         DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+//                    "20210411T010000+0600"
                 )
 
                 if (answer.isSuccessful) {

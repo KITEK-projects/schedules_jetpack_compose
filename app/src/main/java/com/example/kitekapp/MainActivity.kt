@@ -11,16 +11,24 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -91,6 +99,22 @@ fun Navigation() {
                     navController,
                     vm,
                 )
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(bottom = 20.dp),
+                    verticalArrangement = Arrangement.Bottom,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    val uriHandler = LocalUriHandler.current
+                    Text(
+                        text = "Если вы обнаружили баг, дайте знать",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable {
+                            uriHandler.openUri("https://forms.gle/hr3SpBWYM5wDFXEL6")
+                        }
+                    )
+                }
             }
             composable("change_schedule",
                 enterTransition = {

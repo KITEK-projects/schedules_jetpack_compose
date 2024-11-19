@@ -114,6 +114,12 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
                     color = Color.White
                 )
             }
+            Text(
+                text = "Beta",
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(start = 8.dp)
+            )
         }
         IconButton(
             onClick = {
