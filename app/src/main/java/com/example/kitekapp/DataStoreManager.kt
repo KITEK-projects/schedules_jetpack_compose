@@ -16,20 +16,25 @@ class DataStoreManager(private val context: Context) {
     companion object {
         val CLIENT = stringPreferencesKey("CLIENT")
         val isCuratorHour = booleanPreferencesKey("isCuratorHour")
+        val selectLessonDirection = stringPreferencesKey("selectLessonDirection")
     }
 
     suspend fun saveToDataStore(settings: Settings) {
         context.datastore.edit {
             it[CLIENT] = settings.clientName
             it[isCuratorHour] = settings.isCuratorHour
+            it[selectLessonDirection] = settings.selectedLessonDuration.toString()
         }
     }
 
     fun getFromDataStore() = context.datastore.data.map {
         Settings(
             clientName = it[CLIENT]?:"",
-            isCuratorHour = it[isCuratorHour]?:true
+            isCuratorHour = it[isCuratorHour]?:true,
+            selectedLessonDuration = (it[selectLessonDirection]?:"1").toInt()
         )
+
+
     }
 
 }

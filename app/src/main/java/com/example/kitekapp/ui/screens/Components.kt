@@ -174,6 +174,7 @@ fun IsLoading() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ErrorsScreen(
     navController: NavController,
@@ -190,7 +191,7 @@ fun ErrorsScreen(
             tint = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.size(48.dp)
         )
-        when (vm.error) {
+        when (vm.error.scheduleCodeError) {
             400, 404 -> {
                 CustomButton(
                     "Выбрать расписание"
@@ -200,17 +201,24 @@ fun ErrorsScreen(
                     }
                 }
             }
+            0 -> {
+                CustomButton(
+                    "Попробовать снова"
+                ) {
+                    vm.getSchedule(vm.settings.value!!.clientName)
+                }
+            }
             else -> {
 
             }
         }
         Text(
-            text = when (vm.error) {
+            text = when (vm.error.scheduleCodeError) {
                 400 -> "Такого клиента нет, выберите другого"
                 404 -> "Нет расписания, можно выбрать другое)"
                 500 -> "Ошибка сервера, тут только молится"
-                null -> "Нет подключения, лол)"
-                else -> "${vm.error}, ${vm.messageError}"
+                0 -> "Нет подключения, лол)"
+                else -> "${vm.error}, ${vm.error.scheduleMessageError}"
             },
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.secondary,

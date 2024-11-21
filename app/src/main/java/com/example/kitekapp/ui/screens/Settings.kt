@@ -139,9 +139,6 @@ fun Screen(
                     shape = RoundedCornerShape(4.dp),
                     onClick = {
                         vm.updateSelectLessonDuration(index)
-                        navController.navigate("main") {
-                            popUpTo("main") { inclusive = true }
-                        }
                     },
                     selected = index == vm.selectLessonDuration,
                     border = SegmentedButtonDefaults.borderStroke(width = 0.dp, color = Color.Transparent),

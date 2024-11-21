@@ -86,7 +86,7 @@ fun ChangeSchedule(
                     shape = RoundedCornerShape(4.dp),
                     onClick = {
                         vm.selectedIndex = index
-                        vm.updateClients(emptyList())
+                        vm.getClients(vm.selectedIndex)
                     },
                     selected = index == vm.selectedIndex,
                     border = SegmentedButtonDefaults.borderStroke(
@@ -166,62 +166,74 @@ fun ChangeSchedule(
             }
         }
 
-        if (vm.clients.isNotEmpty()) {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxSize(),
-            ) {
-                items(vm.clients.filter { it.contains(textField, ignoreCase = true) }) { item ->
-                    Button(
-                        onClick = {
-                            vm.viewModelScope.launch {
-                                if (settings != null) {
-                                    vm.saveSettings(
-                                        Settings(
-                                            clientName = item,
-                                            isCuratorHour = settings.isCuratorHour
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (vm.clients.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    items(vm.clients.filter { it.contains(textField, ignoreCase = true) }) { item ->
+                        Button(
+                            onClick = {
+                                vm.viewModelScope.launch {
+                                    if (settings != null) {
+                                        vm.saveSettings(
+                                            Settings(
+                                                clientName = item,
+                                                isCuratorHour = settings.isCuratorHour
+                                            )
                                         )
-                                    )
+                                    }
                                 }
-                            }
-                            vm.getSchedule(item)
-                            navController.navigate("main") {
-                                popUpTo("main") { inclusive = true }
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(4.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = item,
-                            style = MaterialTheme.typography.displayMedium,
-                            color = Color.White,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                                vm.getSchedule(item)
+                                navController.navigate("main") {
+                                    popUpTo("main") { inclusive = true }
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(4.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                text = item,
+                                style = MaterialTheme.typography.displayMedium,
+                                color = Color.White,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
-            }
-        } else {
-            fun Int.toBoolean(): Boolean = this == 1
-            vm.getClients(vm.selectedIndex.toBoolean())
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.secondary,
-                    strokeWidth = 2.5.dp,
-                )
+            } else {
+                if (vm.error.isClientsSuccessful) {
+                    vm.getClients(vm.selectedIndex)
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.secondary,
+                        strokeWidth = 2.5.dp,
+                    )
+                } else {
+                    Text(
+                        text = when (vm.error.clientsCodeError) {
+                            400 -> "Кто-то криворукий"
+                            404 -> "В базе данных нет расписания, она пуста."
+                            500 -> "Ошибка сервера, тут только молится"
+                            0 -> "Нет подключения, лол)"
+                            else -> "${vm.error.scheduleCodeError}, ${vm.error.clientsMessageError}"
+                        },
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
             }
         }
     }
-
 }

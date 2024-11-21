@@ -51,7 +51,7 @@ fun Main(
     navController: NavController,
     vm: MyViewModel,
 ) {
-    if (vm.schedule.client != "None" && vm.schedule.schedule.isNotEmpty()) {
+    if (vm.schedule.schedule.isNotEmpty()) {
         val pagerState = rememberPagerState { vm.schedule.schedule.size }
         Column(
             modifier = modifier,
@@ -64,7 +64,7 @@ fun Main(
             if (vm.settings.value!!.clientName == "") {
                 FirstStart(navController)
             } else {
-                if (vm.error == null && vm.messageError == null) {
+                if (vm.error.isScheduleDefault) {
                     IsLoading()
                 } else {
                     ErrorsScreen(vm = vm, navController = navController)

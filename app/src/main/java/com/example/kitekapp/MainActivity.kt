@@ -66,6 +66,7 @@ fun Navigation() {
             if (vm.schedule.schedule.isEmpty()) {
                 if (settings!!.clientName != "")
                     vm.getSchedule(settings!!.clientName)
+                vm.updateSelectLessonDuration(settings!!.selectedLessonDuration)
             }
         }
     }

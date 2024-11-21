@@ -45,8 +45,22 @@ data class Schedules(
 
 data class Settings(
     val clientName: String = "",
-    val isCuratorHour: Boolean = true
+    val isCuratorHour: Boolean = true,
+    val selectedLessonDuration: Int = 1
 )
+
+data class Error(
+    var scheduleCodeError: Int = 0,
+    var scheduleMessageError: String = "",
+    var clientsCodeError: Int = 0,
+    var clientsMessageError: String = "",
+) {
+    val isScheduleDefault: Boolean
+        get() = scheduleCodeError == 0 && scheduleMessageError == ""
+
+    val isClientsSuccessful: Boolean
+        get() = clientsCodeError in listOf(0, 200) && clientsMessageError == ""
+}
 
 
 class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
@@ -64,6 +78,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
                 .collect { settings ->
                     _settings.value = settings
                 }
+
         }
     }
 
@@ -78,8 +93,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
 
     var schedule by mutableStateOf(Schedules())
 
-    var error by mutableStateOf<Int?>(null)
-    var messageError by mutableStateOf<String?>(null)
+    var error by mutableStateOf(Error())
 
     var clients by mutableStateOf<List<String>>(emptyList())
         private set
@@ -100,14 +114,33 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         schedule = schedules
     }
 
-    fun updateClients(newClients: List<String>) {
-        clients = newClients
+    private fun updateError(
+        scheduleCodeError: Int? = null,
+        scheduleMessageError: String? = null,
+        clientsCodeError: Int? = null,
+        clientsMessageError: String? = null,
+    ) {
+        error = Error(
+            scheduleCodeError = scheduleCodeError ?: error.scheduleCodeError,
+            scheduleMessageError = scheduleMessageError ?: error.clientsMessageError,
+            clientsCodeError = clientsCodeError ?: error.clientsCodeError,
+            clientsMessageError = clientsMessageError ?: error.clientsMessageError
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateSelectLessonDuration(upd: Int) {
-        selectLessonDuration = upd
-        updateTime(schedule)
+        viewModelScope.launch {
+            selectLessonDuration = upd
+            saveSettings(
+                Settings(
+                    clientName = settings.value!!.clientName,
+                    isCuratorHour = settings.value!!.isCuratorHour,
+                    selectedLessonDuration = upd
+                )
+            )
+            updateTime(schedule)
+        }
     }
 
     private fun getClient(): OkHttpClient {
@@ -136,13 +169,13 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
                 if (answer.isSuccessful) {
                     answer.body()?.let { responseSchedule ->
                         updateTime(responseSchedule)
-                        error = null
+                        updateError(scheduleCodeError = 0)
                     }
                 } else {
-                    error = answer.code()
+                    updateError(scheduleCodeError = answer.code())
                 }
             } catch (e: Exception) {
-                messageError = e.toString()
+                updateError(scheduleMessageError = e.toString())
             }
         }
     }
@@ -177,20 +210,24 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         }
     }
 
-    fun getClients(isTeacher: Boolean) {
+    fun getClients(isTeacher: Int) {
+        clients = emptyList()
+        fun Int.toBoolean(): Boolean = this == 1
         viewModelScope.launch {
             try {
-                val answer = clientsApi.getClients(isTeacher)
+                val answer = clientsApi.getClients(isTeacher.toBoolean())
 
                 if (answer.isSuccessful) {
                     clients = answer.body()!!
 
-                    error = null
+                    updateError(clientsCodeError = 0)
                 } else {
-                    error = answer.code()
+                    updateError(clientsCodeError = answer.code())
+                    clients = emptyList()
                 }
             } catch (e: Exception) {
-                messageError = e.toString()
+                updateError(clientsMessageError = e.toString())
+                clients = emptyList()
             }
         }
     }
@@ -272,7 +309,8 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         val secondLessonEnd =
             currentTime.plusMinutes(
                 lessonDuration.toLong()
-                        + if (!isSeniorCourse) if (isCuratorHour) 35 else 30 else 0)
+                        + if (!isSeniorCourse) if (isCuratorHour) 35 else 30 else 0
+            )
         schedule.add(
             listOf(
                 currentTime.format(timeFormatter),
@@ -324,11 +362,4 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
 
         return schedule[number]
     }
-
-//    fun getLessonTime(client: String): LessonTime {
-//
-//    }
-//    fun getTimePair(number: Int,): String {
-//
-//    }
 }
