@@ -1,11 +1,9 @@
 package com.example.kitekapp
 
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -39,7 +37,6 @@ import com.example.kitekapp.ui.screens.Settings
 import com.example.kitekapp.ui.theme.KITEKAPPTheme
 
 class MainActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,7 +50,6 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigation() {
     val dataStoreManager = DataStoreManager(LocalContext.current)
@@ -62,12 +58,13 @@ fun Navigation() {
     )
     val settings by vm.settings.collectAsState()
     if (settings != null) {
-        LaunchedEffect(Unit) {
-            if (vm.schedule.schedule.isEmpty()) {
-                if (settings!!.clientName != "")
-                    vm.getSchedule(settings!!.clientName)
-                vm.updateSelectLessonDuration(settings!!.selectedLessonDuration)
-            }
+        val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+        val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
+        LaunchedEffect(lifecycleState) {
+            vm.schedule = Schedules()
+            if (settings!!.clientName != "")
+                vm.getSchedule(settings!!.clientName)
+            vm.updateSelectLessonDuration(settings!!.selectedLessonDuration)
         }
     }
 

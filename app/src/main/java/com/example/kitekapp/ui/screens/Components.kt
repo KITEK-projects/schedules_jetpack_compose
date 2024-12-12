@@ -1,8 +1,6 @@
 package com.example.kitekapp.ui.screens
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -73,7 +71,6 @@ fun Header(navController: NavController, text: String) {
 }
 
 @SuppressLint("StateFlowValueCalledInComposition")
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LunchItem(item: ClassItem, vm: MyViewModel, date: String) {
     val secondLessonEnd = LocalTime.parse(item.time[0])
@@ -174,7 +171,6 @@ fun IsLoading() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ErrorsScreen(
     navController: NavController,

@@ -1,7 +1,5 @@
 package com.example.kitekapp
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +60,11 @@ data class Error(
         get() = clientsCodeError in listOf(0, 200) && clientsMessageError == ""
 }
 
+data class CurrentDate(
+    var date: String,
+    var dayOfWeek: String,
+)
+
 
 class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
 
@@ -82,7 +85,6 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun saveSettings(settings: Settings) {
         viewModelScope.launch {
             dataStoreManager.saveToDataStore(settings)
@@ -128,7 +130,6 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun updateSelectLessonDuration(upd: Int) {
         viewModelScope.launch {
             selectLessonDuration = upd
@@ -154,7 +155,6 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
     private val scheduleApi = retrofit.create(ScheduleApi::class.java)
     private val clientsApi = retrofit.create(ClientsApi::class.java)
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getSchedule(client: String) {
         updateSchedules(Schedules()) // Сбрасываем текущее расписание
         viewModelScope.launch {
@@ -178,8 +178,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun updateTime(schedules: Schedules) {
+    private fun updateTime(schedules: Schedules) {
         viewModelScope.launch {
             val updatedSchedules = schedules.schedule.map { lschedule ->
                 val updatedClasses = lschedule.classes.map { classItem ->
@@ -230,14 +229,16 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun getDate(page: Int): String {
+    fun getDate(page: Int): CurrentDate {
         val date = LocalDate.parse(schedule.schedule[page].date)
         val formatter = DateTimeFormatter.ofPattern("d MMMM", Locale("ru"))
-        return date.format(formatter)
+        val day = DateTimeFormatter.ofPattern("E", Locale("ru"))
+        return CurrentDate(
+            date = date.format(formatter),
+            dayOfWeek = date.format(day)
+        )
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun isMonday(date: String): Boolean {
         val ldate = LocalDate.parse(date) // 2021-10-11
         return ldate.dayOfWeek == DayOfWeek.MONDAY
@@ -258,8 +259,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun calculateLessonSchedule(
+    private fun calculateLessonSchedule(
         number: Int,
         isCuratorHour: Boolean = true, // Есть ли кураторский час
         isSeniorCourse: Boolean = true // "3-4" курс

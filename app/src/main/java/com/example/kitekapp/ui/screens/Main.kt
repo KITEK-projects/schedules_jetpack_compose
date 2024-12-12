@@ -1,8 +1,6 @@
 package com.example.kitekapp.ui.screens
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
@@ -44,7 +42,6 @@ import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
 
 @SuppressLint("StateFlowValueCalledInComposition")
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Main(
     modifier: Modifier = Modifier,
@@ -74,9 +71,9 @@ fun Main(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController) {
+    val currentDate = vm.getDate(pagerState.currentPage)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -88,7 +85,7 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = vm.getDate(pagerState.currentPage),
+                text = currentDate.date,
                 style = MaterialTheme.typography.displayLarge,
                 color = Color.White,
                 modifier = Modifier
@@ -114,12 +111,6 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
                     color = Color.White
                 )
             }
-            Text(
-                text = "Beta",
-                style = MaterialTheme.typography.displaySmall,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(start = 8.dp)
-            )
         }
         IconButton(
             onClick = {
@@ -139,7 +130,6 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Schedule(vm: MyViewModel, pagerState: PagerState) {
     val snapAnimationSpec = spring(
@@ -188,7 +178,6 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Item(
     item: ClassItem,

@@ -1,7 +1,5 @@
 package com.example.kitekapp.ui.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,7 +42,6 @@ import com.example.kitekapp.R
 import com.example.kitekapp.Settings
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Change(
     modifier: Modifier = Modifier,
@@ -61,7 +58,6 @@ fun Change(
 
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangeSchedule(
