@@ -17,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonColors
@@ -34,10 +35,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.kitekapp.MyViewModel
+import com.example.kitekapp.R
 import com.example.kitekapp.Settings
 import kotlinx.coroutines.launch
 
@@ -69,6 +72,8 @@ fun ChangeSchedule(
 
     var textField by remember { mutableStateOf("") }
     val options = listOf("Группа", "Преподаватель")
+
+    val filteredClients = vm.clients.filter { it.contains(textField, ignoreCase = true) }
 
 
     Column(
@@ -135,6 +140,7 @@ fun ChangeSchedule(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
                         .background(Color.Transparent),
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = Color.White,
@@ -162,6 +168,13 @@ fun ChangeSchedule(
                         }
                     },
                     singleLine = true,
+                    trailingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search),
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 )
             }
         }
@@ -169,14 +182,14 @@ fun ChangeSchedule(
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
-            if (vm.clients.isNotEmpty()) {
+            if (vm.clients.isNotEmpty() && filteredClients.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    items(vm.clients.filter { it.contains(textField, ignoreCase = true) }) { item ->
+                    items(filteredClients) { item ->
                         Button(
                             onClick = {
                                 vm.viewModelScope.launch {
@@ -212,6 +225,13 @@ fun ChangeSchedule(
                         }
                     }
                 }
+            } else if (filteredClients.isEmpty() && vm.clients.isNotEmpty()) {
+                Text(
+                    text = "Ничего не найдено..",
+                    style = MaterialTheme.typography.displaySmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
             } else {
                 if (vm.error.isClientsSuccessful) {
                     vm.getClients(vm.selectedIndex)

@@ -254,7 +254,7 @@ fun Item(
                         color = MaterialTheme.colorScheme.secondary,
                     )
                 }
-                if (item.location != "") {
+                if (item.location != null) {
                     Text(
                         text = if (item.location.all { it.isDigit() }) "${item.location} каб." else item.location,
                         style = MaterialTheme.typography.displaySmall,

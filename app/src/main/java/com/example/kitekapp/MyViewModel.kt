@@ -30,7 +30,7 @@ data class ClassItem(
     val title: String,
     val type: String,
     val partner: String,
-    val location: String
+    val location: String?
 )
 
 data class Schedule(
@@ -161,9 +161,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
             try {
                 val answer = scheduleApi.getSchedule(
                     client,
-                    LocalDate.now().atStartOfDay(ZoneOffset.UTC).format(
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-//                    "20210411T010000+0600"
+                    LocalDate.now().atStartOfDay(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
                 )
 
                 if (answer.isSuccessful) {
@@ -235,16 +233,8 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getDate(page: Int): String {
         val date = LocalDate.parse(schedule.schedule[page].date)
-        if (date.isEqual(LocalDate.now())) {
-            return "Сегодня"
-        } else if (date.isEqual(LocalDate.now().minusDays(1))) {
-            return "Вчера"
-        } else if (date.isEqual(LocalDate.now().plusDays(1))) {
-            return "Завтра"
-        } else {
-            val formatter = DateTimeFormatter.ofPattern("d MMMM", Locale("ru"))
-            return date.format(formatter)
-        }
+        val formatter = DateTimeFormatter.ofPattern("d MMMM", Locale("ru"))
+        return date.format(formatter)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
