@@ -104,7 +104,7 @@ fun Navigation() {
                 ) {
                     val uriHandler = LocalUriHandler.current
                     Text(
-                        text = "Если вы обнаружили баг, дайте знать",
+                        text = "Нашли ошибку — дайте знать",
                         style = MaterialTheme.typography.displaySmall,
                         color = MaterialTheme.colorScheme.secondary,
                         textDecoration = TextDecoration.Underline,

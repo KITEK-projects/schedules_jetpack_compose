@@ -60,11 +60,6 @@ data class Error(
         get() = clientsCodeError in listOf(0, 200) && clientsMessageError == ""
 }
 
-data class CurrentDate(
-    var date: String,
-    var dayOfWeek: String,
-)
-
 
 class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
 
@@ -229,14 +224,11 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         }
     }
 
-    fun getDate(page: Int): CurrentDate {
+    fun getDate(page: Int): String {
         val date = LocalDate.parse(schedule.schedule[page].date)
-        val formatter = DateTimeFormatter.ofPattern("d MMMM", Locale("ru"))
-        val day = DateTimeFormatter.ofPattern("E", Locale("ru"))
-        return CurrentDate(
-            date = date.format(formatter),
-            dayOfWeek = date.format(day)
-        )
+        val formatter = DateTimeFormatter.ofPattern("E d MMMM", Locale("ru"))
+        return date.format(formatter)
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
     }
 
     fun isMonday(date: String): Boolean {

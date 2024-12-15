@@ -23,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.kitekapp.ClassItem
 import com.example.kitekapp.MyViewModel
@@ -119,7 +121,9 @@ fun LunchItem(item: ClassItem, vm: MyViewModel, date: String) {
 fun CustomButton(text: String, onClick: () -> Unit) {
     Button(
         modifier = Modifier
-            .padding(top = 16.dp),
+            .fillMaxWidth()
+            .padding(18.dp),
+
         onClick = onClick,
         shape = RoundedCornerShape(4.dp),
         colors = ButtonDefaults.buttonColors(
@@ -185,10 +189,53 @@ fun ErrorsScreen(
             painter = painterResource(R.drawable.ic_error),
             contentDescription = "",
             tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(121.dp)
+        )
+        Text(
+            text = when (vm.error.scheduleCodeError) {
+                400 -> "Кажется, что-то пошло не так"
+                404 -> "Похоже, что расписание пока нет"
+                500 -> "Возникла критическая ошибка, расписание не доступно"
+                0 -> "Нет подключения к интернету"
+                else -> "FATAL ERROR"
+            },
+            style = MaterialTheme.typography.displayMedium,
+            color = Color.White,
+            fontSize = 18.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+        Text(
+            text = when (vm.error.scheduleCodeError) {
+                400 -> "К сожалению, произошла ошибка, и мы не смогли обработать ваш запрос."
+                404 -> "К сожалению, мы не можем найти расписание по вашему запросу. Возможно, оно еще не доступно или было удалено."
+                500 -> "К сожалению, возникла внутренняя ошибка сервера, и мы не можем получить доступ к расписанию в данный момент."
+                0 -> "К сожалению у вас нет доступа к интернету, выполните подключение и повторите попытку"
+                else -> "${vm.error}, ${vm.error.scheduleMessageError}"
+            },
+            style = MaterialTheme.typography.displaySmall,
+            color = MaterialTheme.colorScheme.secondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(vertical = 16.dp, horizontal = 18.dp)
         )
         when (vm.error.scheduleCodeError) {
+            0 -> {
+                CustomButton(
+                    "Повторить попытку"
+                ) {
+                    vm.getSchedule(vm.settings.value!!.clientName)
+                }
+            }
             400, 404 -> {
+            CustomButton(
+                "Выбрать расписание"
+                ) {
+                    navController.navigate("change_schedule") {
+                        popUpTo("main")
+                    }
+                }
+            }
+            else -> {
                 CustomButton(
                     "Выбрать расписание"
                 ) {
@@ -197,28 +244,6 @@ fun ErrorsScreen(
                     }
                 }
             }
-            0 -> {
-                CustomButton(
-                    "Попробовать снова"
-                ) {
-                    vm.getSchedule(vm.settings.value!!.clientName)
-                }
-            }
-            else -> {
-
-            }
         }
-        Text(
-            text = when (vm.error.scheduleCodeError) {
-                400 -> "Такого клиента нет, выберите другого"
-                404 -> "Нет расписания, можно выбрать другое)"
-                500 -> "Ошибка сервера, тут только молится"
-                0 -> "Нет подключения, лол)"
-                else -> "${vm.error}, ${vm.error.scheduleMessageError}"
-            },
-            style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(top = 16.dp)
-        )
     }
 }

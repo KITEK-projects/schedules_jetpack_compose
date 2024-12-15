@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kitekapp.ClassItem
@@ -73,7 +74,6 @@ fun Main(
 
 @Composable
 fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController) {
-    val currentDate = vm.getDate(pagerState.currentPage)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -85,7 +85,7 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = currentDate.date,
+                text = vm.getDate(pagerState.currentPage),
                 style = MaterialTheme.typography.displayLarge,
                 color = Color.White,
                 modifier = Modifier
@@ -141,38 +141,51 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState) {
         HorizontalPager(
             state = pagerState,
             beyondViewportPageCount = 1,
+            modifier = Modifier.fillMaxSize()
         ) { page ->
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+            if (vm.schedule.schedule.getOrNull(page)?.classes?.isNotEmpty() == true) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
 
-                flingBehavior = PagerDefaults.flingBehavior(
-                    state = pagerState,
-                    decayAnimationSpec = rememberSplineBasedDecay(),
-                    snapAnimationSpec = snapAnimationSpec
-                )
-            ) {
-                itemsIndexed(
-                    vm.schedule.schedule.getOrNull(page)?.classes ?: emptyList()
-                ) { index, item ->
+                    flingBehavior = PagerDefaults.flingBehavior(
+                        state = pagerState,
+                        decayAnimationSpec = rememberSplineBasedDecay(),
+                        snapAnimationSpec = snapAnimationSpec
+                    )
+                ) {
+                    itemsIndexed(
+                        vm.schedule.schedule.getOrNull(page)?.classes ?: emptyList()
+                    ) { index, item ->
 
-                    if (vm.schedule.schedule[page].classes.count { it.number == 2 } == 2) {
-                        if (item.number == 2 && vm.schedule.schedule[page].classes[index + 1].number > 2) {
+                        if (vm.schedule.schedule[page].classes.count { it.number == 2 } == 2) {
+                            if (item.number == 2 && vm.schedule.schedule[page].classes[index + 1].number > 2) {
 
-                            Item(item)
-                            LunchItem(item, vm, vm.schedule.schedule[index].date)
+                                Item(item)
+                                LunchItem(item, vm, vm.schedule.schedule[index].date)
+                            } else {
+                                Item(item)
+                            }
                         } else {
-                            Item(item)
-                        }
-                    } else {
-                        if (item.number == 2) {
+                            if (item.number == 2) {
 
-                            Item(item)
-                            LunchItem(item, vm, vm.schedule.schedule[page].date)
-                        } else {
-                            Item(item)
+                                Item(item)
+                                LunchItem(item, vm, vm.schedule.schedule[page].date)
+                            } else {
+                                Item(item)
+                            }
                         }
                     }
                 }
+            } else {
+                Text(
+                    text = "Сегодня занятия не проводятся",
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                )
             }
         }
     }
