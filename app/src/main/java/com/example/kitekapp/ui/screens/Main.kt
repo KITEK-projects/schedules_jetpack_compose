@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
@@ -25,6 +27,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,10 +38,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.kitekapp.ClassItem
+import com.example.kitekapp.Lesson
 import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
 
@@ -49,8 +53,8 @@ fun Main(
     navController: NavController,
     vm: MyViewModel,
 ) {
-    if (vm.schedule.schedule.isNotEmpty()) {
-        val pagerState = rememberPagerState { vm.schedule.schedule.size }
+    if (vm.schedules.schedules.isNotEmpty()) {
+        val pagerState = rememberPagerState { vm.schedules.schedules.size }
         Column(
             modifier = modifier,
         ) {
@@ -106,7 +110,7 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
             ) {
                 Text(
-                    text = vm.schedule.client,
+                    text = vm.schedules.clientName,
                     style = MaterialTheme.typography.displaySmall,
                     color = Color.White
                 )
@@ -143,7 +147,7 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState) {
             beyondViewportPageCount = 1,
             modifier = Modifier.fillMaxSize()
         ) { page ->
-            if (vm.schedule.schedule.getOrNull(page)?.classes?.isNotEmpty() == true) {
+            if (vm.schedules.schedules.getOrNull(page)?.lessons?.isNotEmpty() == true) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
 
@@ -154,26 +158,9 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState) {
                     )
                 ) {
                     itemsIndexed(
-                        vm.schedule.schedule.getOrNull(page)?.classes ?: emptyList()
-                    ) { index, item ->
-
-                        if (vm.schedule.schedule[page].classes.count { it.number == 2 } == 2) {
-                            if (item.number == 2 && vm.schedule.schedule[page].classes[index + 1].number > 2) {
-
-                                Item(item)
-                                LunchItem(item, vm, vm.schedule.schedule[index].date)
-                            } else {
-                                Item(item)
-                            }
-                        } else {
-                            if (item.number == 2) {
-
-                                Item(item)
-                                LunchItem(item, vm, vm.schedule.schedule[page].date)
-                            } else {
-                                Item(item)
-                            }
-                        }
+                        vm.schedules.schedules.getOrNull(page)?.lessons ?: emptyList()
+                    ) { _, item ->
+                        Item(item)
                     }
                 }
             } else {
@@ -193,80 +180,87 @@ fun Schedule(vm: MyViewModel, pagerState: PagerState) {
 
 @Composable
 fun Item(
-    item: ClassItem,
+    item: Lesson,
 ) {
     Row(
         modifier = Modifier
             .padding(horizontal = 14.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(20.dp))
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.onBackground)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(end = 16.dp),
-        ) {
-            Text(
-                text = item.time[0],
-                style = MaterialTheme.typography.displayLarge,
-                color = Color.White,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            Text(
-                text = item.time[1],
-                style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        }
         Column {
-            Text(
-                text = item.partner,
-                style = MaterialTheme.typography.displaySmall,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.displayMedium,
-                color = Color.White,
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-            ) {
-                Text(
-                    text = "${item.number} пара",
-                    style = MaterialTheme.typography.displaySmall,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Row {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_book),
-                        contentDescription = "book",
-                        tint = MaterialTheme.colorScheme.secondary,
-                    )
+            item.items.mapIndexed { index, lesson ->
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = lesson.title,
+                            style = MaterialTheme.typography.displayMedium,
+                            color = Color.White,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = lesson.type,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = item.type,
+                        text = "${item.time[0]}-${item.time[1]} - ${item.number} пара",
                         style = MaterialTheme.typography.displaySmall,
                         color = MaterialTheme.colorScheme.secondary,
                     )
-                }
-                if (item.location != null) {
-                    Text(
-                        text = if (item.location.all { it.isDigit() }) "${item.location} каб." else item.location,
-                        style = MaterialTheme.typography.displaySmall,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .clip(RoundedCornerShape(25.dp))
-                            .background(MaterialTheme.colorScheme.onSecondary)
-                            .padding(horizontal = 8.dp)
-                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row {
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_partner),
+                                contentDescription = "partner",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = lesson.partner,
+                                style = MaterialTheme.typography.displaySmall,
+                                color = Color.White,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        if (!lesson.location.isNullOrEmpty()) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_location),
+                                    contentDescription = "location",
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = lesson.location,
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                    if (item.items.size > 1 && index == 0) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.onSecondary)
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
         }

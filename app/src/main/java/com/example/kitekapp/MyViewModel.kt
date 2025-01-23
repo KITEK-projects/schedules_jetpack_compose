@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kitekapp.retrofit2.ClientsApi
 import com.example.kitekapp.retrofit2.ScheduleApi
+import com.google.gson.FieldNamingPolicy
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -18,27 +20,30 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-data class ClassItem(
-    val time: List<String>,
-    val number: Int,
+data class LessonItem(
     val title: String,
     val type: String,
     val partner: String,
     val location: String?
 )
 
-data class Schedule(
+data class Lesson(
+    val time: List<String>,
+    val number: Int,
+    val items: List<LessonItem>
+)
+
+data class Lessons(
     val date: String,
-    val classes: List<ClassItem>
+    val lessons: List<Lesson>
 )
 
 data class Schedules(
-    val client: String = "None",
-    val schedule: List<Schedule> = emptyList(),
+    val clientName: String = "None",
+    val schedules: List<Lessons> = emptyList(),
 )
 
 data class Settings(
@@ -83,12 +88,12 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
     fun saveSettings(settings: Settings) {
         viewModelScope.launch {
             dataStoreManager.saveToDataStore(settings)
-            updateTime(schedule)
+            updateTime(schedules)
         }
     }
 
 
-    var schedule by mutableStateOf(Schedules())
+    var schedules by mutableStateOf(Schedules())
 
     var error by mutableStateOf(Error())
 
@@ -108,7 +113,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         .build()
 
     private fun updateSchedules(schedules: Schedules) {
-        schedule = schedules
+        this.schedules = schedules
     }
 
     private fun updateError(
@@ -135,7 +140,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
                     selectedLessonDuration = upd
                 )
             )
-            updateTime(schedule)
+            updateTime(schedules)
         }
     }
 
@@ -143,24 +148,30 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         return client
     }
 
+    private val gson = GsonBuilder()
+        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        .create()
+
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://schedule.omsktec-playgrounds.ru/api/v1/")
         .client(getClient())
-        .addConverterFactory(GsonConverterFactory.create()).build()
+        .addConverterFactory(GsonConverterFactory.create(gson)).build()
     private val scheduleApi = retrofit.create(ScheduleApi::class.java)
     private val clientsApi = retrofit.create(ClientsApi::class.java)
 
     fun getSchedule(client: String) {
-        updateSchedules(Schedules()) // Сбрасываем текущее расписание
+        updateSchedules(Schedules())
         viewModelScope.launch {
             try {
                 val answer = scheduleApi.getSchedule(
                     client,
-                    LocalDate.now().atStartOfDay(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+//                    LocalDate.now().atStartOfDay(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    "2021-01-12T22:47:25+06:00"
                 )
 
                 if (answer.isSuccessful) {
                     answer.body()?.let { responseSchedule ->
+                        println(responseSchedule)
                         updateTime(responseSchedule)
                         updateError(scheduleCodeError = 0)
                     }
@@ -175,30 +186,29 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
 
     private fun updateTime(schedules: Schedules) {
         viewModelScope.launch {
-            val updatedSchedules = schedules.schedule.map { lschedule ->
-                val updatedClasses = lschedule.classes.map { classItem ->
+            val updatedLessons = schedules.schedules.map { lschedule ->
+                val updatedLessonsItem = lschedule.lessons.map { lessonItem ->
                     val generatedTime = calculateLessonSchedule(
-                        classItem.number - 1,
+                        lessonItem.number - 1,
                         isCuratorHour = if (_settings.value?.isCuratorHour == true) isMonday(lschedule.date) else false,
-                        isSeniorCourse = when (typeClient(schedules.client)) {
-                            "teach" -> when (typeClient(classItem.partner)) {
+                        isSeniorCourse = when (typeClient(schedules.clientName)) {
+                            "teach" -> when (typeClient(lessonItem.items.first().partner)) {
                                 "1-2" -> false
                                 "3-4" -> true
                                 else -> false
                             }
-
                             "1-2" -> false
                             "3-4" -> true
                             else -> false
                         }
                     )
-                    classItem.copy(time = generatedTime)
+                    println("Generated time for lesson: $generatedTime")
+                    lessonItem.copy(time = generatedTime)
                 }
-                Schedule(lschedule.date, updatedClasses)
+                Lessons(lschedule.date, updatedLessonsItem)
             }
 
-            // Обновляем глобальное расписание
-            updateSchedules(Schedules(schedules.client, updatedSchedules))
+            updateSchedules(Schedules(schedules.clientName, updatedLessons))
         }
     }
 
@@ -225,7 +235,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
     }
 
     fun getDate(page: Int): String {
-        val date = LocalDate.parse(schedule.schedule[page].date)
+        val date = LocalDate.parse(schedules.schedules[page].date)
         val formatter = DateTimeFormatter.ofPattern("E d MMMM", Locale("ru"))
         return date.format(formatter)
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }

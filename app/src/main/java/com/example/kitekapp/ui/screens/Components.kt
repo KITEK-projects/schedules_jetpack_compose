@@ -1,6 +1,5 @@
 package com.example.kitekapp.ui.screens
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,11 +26,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.kitekapp.ClassItem
 import com.example.kitekapp.MyViewModel
 import com.example.kitekapp.R
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
+
 
 @Composable
 fun Header(navController: NavController, text: String) {
@@ -69,51 +66,6 @@ fun Header(navController: NavController, text: String) {
             }
         }
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onPrimary)
-    }
-}
-
-@SuppressLint("StateFlowValueCalledInComposition")
-@Composable
-fun LunchItem(item: ClassItem, vm: MyViewModel, date: String) {
-    val secondLessonEnd = LocalTime.parse(item.time[0])
-    val isSeniorCourse = when (vm.typeClient(vm.schedule.client)) {
-        "teach" -> when (vm.typeClient(item.partner)) {
-            "1-2" -> false
-            "3-4" -> true
-            else -> false
-        }
-
-        "1-2" -> false
-        "3-4" -> true
-        else -> false
-    }
-    val schedule = mutableListOf<String>()
-
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-
-    val lunchStart = secondLessonEnd.plusMinutes((45 + if (isSeniorCourse) 45 else 0).toLong())
-    val lunchEnd = lunchStart
-        .plusMinutes(if (vm.settings.value!!.isCuratorHour && vm.isMonday(date)) 35 else 30)
-        .plusMinutes(if (isSeniorCourse) 10 else 0)
-
-    schedule.add(lunchStart.format(timeFormatter))
-    schedule.add(lunchEnd.format(timeFormatter))
-
-    Row(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "${schedule[0]} - ${schedule[1]}",
-            style = MaterialTheme.typography.displayMedium,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(end = 5.dp)
-        )
-        Text(
-            text = "Обеденный перерыв",
-            style = MaterialTheme.typography.displayMedium,
-            color = Color.White,
-        )
     }
 }
 

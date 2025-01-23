@@ -61,7 +61,7 @@ fun Navigation() {
         val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
         val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
         LaunchedEffect(lifecycleState) {
-            vm.schedule = Schedules()
+            vm.schedules = Schedules()
             if (settings!!.clientName != "")
                 vm.getSchedule(settings!!.clientName)
             vm.updateSelectLessonDuration(settings!!.selectedLessonDuration)
