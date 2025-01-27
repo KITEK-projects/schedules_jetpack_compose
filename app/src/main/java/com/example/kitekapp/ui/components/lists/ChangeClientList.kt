@@ -1,4 +1,4 @@
-package com.example.kitekapp.ui.screens
+package com.example.kitekapp.ui.components.lists
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,50 +34,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.kitekapp.MyViewModel
+import com.example.kitekapp.viewmodel.MyViewModel
 import com.example.kitekapp.R
-import com.example.kitekapp.Settings
-import kotlinx.coroutines.launch
-
-@Composable
-fun Change(
-    modifier: Modifier = Modifier,
-    navController: NavController,
-    vm: MyViewModel,
-    settings: Settings?,
-) {
-    Column(
-        modifier = modifier
-    ) {
-        Header(navController, "Выбор расписания")
-        ChangeSchedule(navController = navController, vm, settings)
-    }
-
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangeSchedule(
+fun ChangeClientList(
     navController: NavController,
     vm: MyViewModel,
-    settings: Settings?,
 ) {
-
     var textField by remember { mutableStateOf("") }
     val options = listOf("Группа", "Преподаватель")
 
-    val filteredClients = vm.clients.filter { it.contains(textField, ignoreCase = true) }
+    val filteredClients = vm.clientList.filter { it.contains(textField, ignoreCase = true) }
+    LaunchedEffect(LocalContext.current) {
+        vm.apiService.getClients(vm,0)
+    }
 
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -86,10 +69,10 @@ fun ChangeSchedule(
                 SegmentedButton(
                     shape = RoundedCornerShape(4.dp),
                     onClick = {
-                        vm.selectedIndex = index
-                        vm.getClients(vm.selectedIndex)
+                        vm.selectedTypeClient = index
+                        vm.apiService.getClients(vm, index)
                     },
-                    selected = index == vm.selectedIndex,
+                    selected = index == vm.selectedTypeClient,
                     border = SegmentedButtonDefaults.borderStroke(
                         width = 0.dp,
                         color = Color.Transparent
@@ -151,7 +134,7 @@ fun ChangeSchedule(
                     ),
                     textStyle = MaterialTheme.typography.displayMedium,
                     placeholder = {
-                        if (vm.selectedIndex == 1) {
+                        if (vm.selectedTypeClient == 1) {
                             Text(
                                 "Введите фамилию",
                                 color = MaterialTheme.colorScheme.secondary
@@ -180,7 +163,7 @@ fun ChangeSchedule(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            if (vm.clients.isNotEmpty() && filteredClients.isNotEmpty()) {
+            if (vm.clientList.isNotEmpty() && filteredClients.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -188,17 +171,9 @@ fun ChangeSchedule(
                     items(filteredClients) { item ->
                         Button(
                             onClick = {
-                                vm.viewModelScope.launch {
-                                    if (settings != null) {
-                                        vm.saveSettings(
-                                            Settings(
-                                                clientName = item,
-                                                isCuratorHour = settings.isCuratorHour
-                                            )
-                                        )
-                                    }
-                                }
-                                vm.getSchedule(item)
+                                vm.updateSettingsData(
+                                    clientName = item
+                                )
                                 navController.navigate("main") {
                                     popUpTo("main") { inclusive = true }
                                 }
@@ -221,7 +196,7 @@ fun ChangeSchedule(
                         }
                     }
                 }
-            } else if (filteredClients.isEmpty() && vm.clients.isNotEmpty()) {
+            } else if (filteredClients.isEmpty() && vm.clientList.isNotEmpty()) {
                 Text(
                     text = "Ничего не найдено..",
                     style = MaterialTheme.typography.displaySmall,
@@ -229,26 +204,10 @@ fun ChangeSchedule(
                     modifier = Modifier.padding(top = 16.dp)
                 )
             } else {
-                if (vm.error.isClientsSuccessful) {
-                    vm.getClients(vm.selectedIndex)
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.secondary,
-                        strokeWidth = 2.5.dp,
-                    )
-                } else {
-                    Text(
-                        text = when (vm.error.clientsCodeError) {
-                            400 -> "Кто-то криворукий"
-                            404 -> "В базе данных нет расписания, она пуста."
-                            500 -> "Ошибка сервера, тут только молится"
-                            0 -> "Нет подключения, лол)"
-                            else -> "${vm.error.scheduleCodeError}, ${vm.error.clientsMessageError}"
-                        },
-                        style = MaterialTheme.typography.displaySmall,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                }
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.secondary,
+                    strokeWidth = 2.5.dp,
+                )
             }
         }
     }

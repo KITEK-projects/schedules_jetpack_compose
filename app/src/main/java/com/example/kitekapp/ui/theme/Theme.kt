@@ -16,6 +16,7 @@ private val DarkColorScheme = darkColorScheme(
     onSecondary = bg_additional,
     primary = blue,
     secondary = gray,
+    tertiary = teacher,
 )
 
 @Composable

@@ -1,4 +1,4 @@
-package com.example.kitekapp.retrofit2
+package com.example.kitekapp.data.network.retrofit2
 
 import retrofit2.Response
 import retrofit2.http.GET

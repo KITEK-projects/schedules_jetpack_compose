@@ -1,7 +1,8 @@
-package com.example.kitekapp
+package com.example.kitekapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.kitekapp.data.DataStoreManager
 
 class MyViewModelFactory(private val dataStoreManager: DataStoreManager) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

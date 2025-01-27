@@ -1,4 +1,4 @@
-package com.example.kitekapp
+package com.example.kitekapp.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.kitekapp.data.model.SettingsData
 import kotlinx.coroutines.flow.map
 
 val Context.datastore: DataStore<Preferences> by preferencesDataStore(name = "user_data")
@@ -14,27 +15,22 @@ val Context.datastore: DataStore<Preferences> by preferencesDataStore(name = "us
 class DataStoreManager(private val context: Context) {
 
     companion object {
-        val CLIENT = stringPreferencesKey("CLIENT")
+        val clientName = stringPreferencesKey("CLIENT")
         val isCuratorHour = booleanPreferencesKey("isCuratorHour")
-        val selectLessonDirection = stringPreferencesKey("selectLessonDirection")
     }
 
-    suspend fun saveToDataStore(settings: Settings) {
+    suspend fun saveToDataStore(settingsData: SettingsData) {
         context.datastore.edit {
-            it[CLIENT] = settings.clientName
-            it[isCuratorHour] = settings.isCuratorHour
-            it[selectLessonDirection] = settings.selectedLessonDuration.toString()
+            it[clientName] = settingsData.clientName
+            it[isCuratorHour] = settingsData.isCuratorHour
         }
     }
 
     fun getFromDataStore() = context.datastore.data.map {
-        Settings(
-            clientName = it[CLIENT]?:"",
+        SettingsData(
+            clientName = it[clientName]?:"",
             isCuratorHour = it[isCuratorHour]?:true,
-            selectedLessonDuration = (it[selectLessonDirection]?:"1").toInt()
         )
-
-
     }
 
 }

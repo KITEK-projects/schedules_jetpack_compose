@@ -1,10 +1,9 @@
-package com.example.kitekapp.retrofit2
+package com.example.kitekapp.data.network.retrofit2
 
-import com.example.kitekapp.Schedules
+import com.example.kitekapp.data.model.Schedule
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ScheduleApi {
@@ -12,5 +11,5 @@ interface ScheduleApi {
     suspend fun getSchedule(
         @Query("client_name") client: String,
         @Header("X-CLIENT-TIME") time: String
-        ): Response<Schedules>
+        ): Response<Schedule>
 }
