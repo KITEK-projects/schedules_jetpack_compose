@@ -9,16 +9,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kitekapp.R
+import com.example.kitekapp.ui.theme.customColors
+import com.example.kitekapp.ui.theme.customTypography
 
 @Composable
 fun SecondaryScreenHeader(navController: NavController, text: String) {
@@ -34,8 +34,8 @@ fun SecondaryScreenHeader(navController: NavController, text: String) {
         ) {
             Text(
                 text = text,
-                style = MaterialTheme.typography.displayLarge,
-                color = Color.White,
+                style = customTypography.robotoMedium20,
+                color = customColors.mainText,
             )
             IconButton(
                 onClick = {
@@ -50,11 +50,11 @@ fun SecondaryScreenHeader(navController: NavController, text: String) {
                 Icon(
                     painter = painterResource(R.drawable.ic_close),
                     contentDescription = "Close",
-                    tint = MaterialTheme.colorScheme.secondary,
+                    tint = customColors.secondaryTextAndIcons,
                     modifier = Modifier.size(24.dp)
                 )
             }
         }
-        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onPrimary)
+        HorizontalDivider(thickness = 1.dp, color = customColors.forLine)
     }
 }

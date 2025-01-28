@@ -1,26 +1,43 @@
 package com.example.kitekapp.ui.theme
 
-import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.kitekapp.R
+import com.example.kitekapp.data.model.CustomTypography
 
-val inter = FontFamily(Font(R.font.inter, FontWeight.Normal))
+val robotoRegular = FontFamily(Font(R.font.roboto, FontWeight.Normal))
+val robotoMedium = FontFamily(Font(R.font.roboto, FontWeight.Medium))
 
-val Typography = Typography(
-    displayLarge = TextStyle(
-        fontFamily = inter,
+val typography = CustomTypography(
+    robotoMedium20 = TextStyle(
         fontSize = 20.sp,
+        fontFamily = robotoMedium
     ),
-    displayMedium = TextStyle(
-        fontFamily = inter,
+    robotoRegular20 = TextStyle(
+        fontSize = 20.sp,
+        fontFamily = robotoRegular
+    ),
+    robotoRegular16 = TextStyle(
         fontSize = 16.sp,
+        fontFamily = robotoRegular
     ),
-    displaySmall = TextStyle(
-        fontFamily = inter,
+    robotoMedium14 = TextStyle(
         fontSize = 14.sp,
+        fontFamily = robotoMedium
     ),
+    robotoRegular14 = TextStyle(
+        fontSize = 14.sp,
+        fontFamily = robotoRegular
+    ),
+    robotoMedium12 = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = robotoMedium
+    ),
+    robotoRegular12 = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = robotoRegular
+    )
 )

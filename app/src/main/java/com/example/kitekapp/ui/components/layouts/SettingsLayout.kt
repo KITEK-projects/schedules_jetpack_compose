@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -23,6 +22,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.kitekapp.viewmodel.MyViewModel
 import com.example.kitekapp.R
+import com.example.kitekapp.ui.theme.customColors
+import com.example.kitekapp.ui.theme.customTypography
 
 import kotlinx.coroutines.launch
 
@@ -45,9 +46,9 @@ fun SettingsLayout(
                 }
         ) {
             Text(
-                text = "Выбор расписания",
-                style = MaterialTheme.typography.displayMedium,
-                color = Color.White
+                text = "Выбрать расписания",
+                style = customTypography.robotoRegular16,
+                color = customColors.mainText
             )
             IconButton(
                 onClick = {
@@ -59,7 +60,7 @@ fun SettingsLayout(
                 Icon(
                     painter = painterResource(R.drawable.ic_right),
                     contentDescription = "Right",
-                    tint = MaterialTheme.colorScheme.secondary,
+                    tint = customColors.secondaryTextAndIcons,
                     modifier = Modifier.size(30.dp)
                 )
             }
@@ -73,8 +74,8 @@ fun SettingsLayout(
         ) {
             Text(
                 text = "Кураторскиe часы по пн.",
-                style = MaterialTheme.typography.displayMedium,
-                color = Color.White
+                style = customTypography.robotoRegular16,
+                color = customColors.mainText
             )
             Switch(
                 checked = vm.settingsData.isCuratorHour,
@@ -84,13 +85,13 @@ fun SettingsLayout(
                     }
                 },
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = MaterialTheme.colorScheme.onBackground,
+                    checkedThumbColor = customColors.mainText,
+                    checkedTrackColor = customColors.itemPrimary,
                     checkedBorderColor = Color.Transparent,
-                    uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
+                    uncheckedThumbColor = customColors.secondaryTextAndIcons,
                     uncheckedBorderColor = Color.Transparent,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.onBackground
-                ),
+                    uncheckedTrackColor = customColors.itemPrimary
+                )
             )
         }
     }

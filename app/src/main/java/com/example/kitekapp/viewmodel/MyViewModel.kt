@@ -44,7 +44,7 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
         )
 
         saveSettingsData()
-        apiService.getSchedule(this, settingsData.clientName)
+        settingsData.clientName?.let { apiService.getSchedule(this, it) }
     }
 
 

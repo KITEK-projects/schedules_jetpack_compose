@@ -16,7 +16,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonColors
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -40,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kitekapp.viewmodel.MyViewModel
 import com.example.kitekapp.R
+import com.example.kitekapp.ui.theme.customColors
+import com.example.kitekapp.ui.theme.customTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +79,7 @@ fun ChangeClientList(
                         color = Color.Transparent
                     ),
                     colors = SegmentedButtonColors(
-                        activeContainerColor = MaterialTheme.colorScheme.onBackground,
+                        activeContainerColor = customColors.itemPrimary,
                         activeBorderColor = Color.Transparent,
                         activeContentColor = Color.Transparent,
                         inactiveContainerColor = Color.Transparent,
@@ -97,8 +98,8 @@ fun ChangeClientList(
                 ) {
                     Text(
                         text = label,
-                        style = MaterialTheme.typography.displayMedium,
-                        color = Color.White
+                        style = customTypography.robotoRegular16,
+                        color = customColors.mainText
                     )
                 }
             }
@@ -108,7 +109,7 @@ fun ChangeClientList(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 4.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.onBackground)
+                    .background(customColors.itemPrimary)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
@@ -122,36 +123,29 @@ fun ChangeClientList(
                         .padding(horizontal = 4.dp)
                         .background(Color.Transparent),
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
+                        focusedTextColor = customColors.mainText,
+                        unfocusedTextColor = customColors.mainText,
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
-                        cursorColor = Color.White,
+                        cursorColor = customColors.mainText,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        focusedPlaceholderColor = Color.White,
-                        unfocusedPlaceholderColor = Color.White
+                        focusedPlaceholderColor = customColors.mainText,
+                        unfocusedPlaceholderColor = customColors.mainText
                     ),
-                    textStyle = MaterialTheme.typography.displayMedium,
+                    textStyle = customTypography.robotoRegular16,
                     placeholder = {
-                        if (vm.selectedTypeClient == 1) {
-                            Text(
-                                "Введите фамилию",
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        } else {
-                            Text(
-                                "Введите группу",
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        }
+                        Text(
+                            if (vm.selectedTypeClient == 1) "Введите фамилию" else "Введите группу",
+                            color = customColors.secondaryTextAndIcons
+                        )
                     },
                     singleLine = true,
                     trailingIcon = {
                         Icon(
                             painter = painterResource(R.drawable.ic_search),
                             contentDescription = "",
-                            tint = MaterialTheme.colorScheme.secondary
+                            tint = customColors.secondaryTextAndIcons
                         )
                     }
                 )
@@ -189,8 +183,8 @@ fun ChangeClientList(
                         ) {
                             Text(
                                 text = item,
-                                style = MaterialTheme.typography.displayMedium,
-                                color = Color.White,
+                                style = customTypography.robotoRegular16,
+                                color = customColors.mainText,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -199,13 +193,13 @@ fun ChangeClientList(
             } else if (filteredClients.isEmpty() && vm.clientList.isNotEmpty()) {
                 Text(
                     text = "Ничего не найдено..",
-                    style = MaterialTheme.typography.displaySmall,
-                    color = MaterialTheme.colorScheme.secondary,
+                    style = customTypography.robotoRegular12,
+                    color = customColors.secondaryTextAndIcons,
                     modifier = Modifier.padding(top = 16.dp)
                 )
             } else {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = customColors.secondaryTextAndIcons,
                     strokeWidth = 2.5.dp,
                 )
             }

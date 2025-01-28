@@ -28,7 +28,7 @@ class DataStoreManager(private val context: Context) {
 
     fun getFromDataStore() = context.datastore.data.map {
         SettingsData(
-            clientName = it[clientName]?:"",
+            clientName = it[clientName]?:"None",
             isCuratorHour = it[isCuratorHour]?:true,
         )
     }

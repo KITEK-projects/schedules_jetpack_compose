@@ -2,11 +2,11 @@ package com.example.kitekapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val bg = Color(0xFF191919)
-val bg_item = Color(0xFF232323)
-val bg_additional = Color(0x306D6D6D)
-val gray = Color(0xFF818181)
-val teacher = Color(0xFF333436)
-val blue = Color(0xFF028BD3)
-val opacity_white = Color(0x30FFFFFF)
+val background = Color(0xFF191919)
+val itemPrimary = Color(0xFF212222)
+val itemSecondary = Color(0xFF313436)
+val mainText = Color(0xFFFFFFFF)
+val secondaryTextAndIcons = Color(0xFF818181)
+val accent = Color(0xFF028BD3)
+val forLine = Color(0xFF2C2D2F)
 

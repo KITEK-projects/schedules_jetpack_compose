@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
@@ -29,9 +28,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.kitekapp.ui.screens.ChangeClientScreen
 import com.example.kitekapp.ui.screens.MainScreen
-import com.example.kitekapp.ui.theme.KITEKAPPTheme
+import com.example.kitekapp.ui.theme.AppTheme
 import com.example.kitekapp.data.DataStoreManager
 import com.example.kitekapp.ui.screens.SettingsScreen
+import com.example.kitekapp.ui.theme.customColors
+import com.example.kitekapp.ui.theme.customTypography
 import com.example.kitekapp.viewmodel.MyViewModel
 import com.example.kitekapp.viewmodel.MyViewModelFactory
 
@@ -42,15 +43,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            KITEKAPPTheme {
+            AppTheme {
                 val dataStoreManager = DataStoreManager(LocalContext.current)
                 val viewModel: MyViewModel = viewModel(
                     factory = MyViewModelFactory(dataStoreManager)
                 )
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) { innerPadding ->
                     val navController = rememberNavController()
-                    NavHost(navController = navController, startDestination = "main") {
+                    NavHost(
+                        navController = navController,
+                        startDestination = "main",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .background(customColors.background)
+                    ) {
 
                         composable(
                             "main",
@@ -67,14 +78,7 @@ class MainActivity : ComponentActivity() {
                                 slideOutHorizontally(targetOffsetX = {it})
                             },
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(innerPadding)
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.background)
-                            ) {
-                                MainScreen(navController, viewModel)
-                            }
+                            MainScreen(navController, viewModel)
 
                             Column(
                                 modifier = Modifier.fillMaxSize().padding(bottom = 20.dp),
@@ -84,8 +88,8 @@ class MainActivity : ComponentActivity() {
                                 val uriHandler = LocalUriHandler.current
                                 Text(
                                     text = "Нашли ошибку — дайте знать",
-                                    style = MaterialTheme.typography.displaySmall,
-                                    color = MaterialTheme.colorScheme.secondary,
+                                    style = customTypography.robotoRegular12,
+                                    color = customColors.secondaryTextAndIcons,
                                     textDecoration = TextDecoration.Underline,
                                     modifier = Modifier.clickable {
                                         uriHandler.openUri("https://forms.gle/hr3SpBWYM5wDFXEL6")
@@ -107,17 +111,10 @@ class MainActivity : ComponentActivity() {
                                 slideOutVertically(targetOffsetY = {it})
                             },
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(innerPadding)
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.background),
-                            ) {
-                                ChangeClientScreen(
-                                    navController,
-                                    viewModel,
-                                )
-                            }
+                            ChangeClientScreen(
+                                navController,
+                                viewModel,
+                            )
                         }
                         composable("settings",
                             enterTransition = {
@@ -133,17 +130,10 @@ class MainActivity : ComponentActivity() {
                                 slideOutVertically(targetOffsetY = {it})
                             },
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(innerPadding)
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.background),
-                            ) {
-                                SettingsScreen(
-                                    navController,
-                                    viewModel,
-                                )
-                            }
+                            SettingsScreen(
+                                navController,
+                                viewModel,
+                            )
                         }
                     }
                 }

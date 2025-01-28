@@ -13,17 +13,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kitekapp.viewmodel.MyViewModel
 import com.example.kitekapp.R
+import com.example.kitekapp.ui.theme.customColors
+import com.example.kitekapp.ui.theme.customTypography
 import com.example.kitekapp.utils.getDate
 
 @Composable
@@ -40,8 +40,8 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
         ) {
             Text(
                 text = getDate(vm, pagerState.currentPage),
-                style = MaterialTheme.typography.displayMedium,
-                color = Color.White,
+                style = customTypography.robotoMedium20,
+                color = customColors.mainText,
                 modifier = Modifier
                     .padding(end = 8.dp)
             )
@@ -55,14 +55,14 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
                 },
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = customColors.accent
                 ),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
             ) {
                 Text(
                     text = vm.schedule.clientName,
-                    style = MaterialTheme.typography.displaySmall,
-                    color = Color.White
+                    style = customTypography.robotoRegular14,
+                    color = customColors.mainText
                 )
             }
         }
@@ -76,7 +76,7 @@ fun Header(vm: MyViewModel, pagerState: PagerState, navController: NavController
             Icon(
                 painter = painterResource(R.drawable.ic_settings),
                 contentDescription = "Settings",
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = customColors.secondaryTextAndIcons,
                 modifier = Modifier.size(28.dp)
             )
         }

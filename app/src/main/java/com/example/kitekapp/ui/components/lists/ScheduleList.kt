@@ -13,12 +13,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.kitekapp.ui.theme.customColors
+import com.example.kitekapp.ui.theme.customTypography
 import com.example.kitekapp.viewmodel.MyViewModel
 
 @Composable
@@ -53,8 +54,8 @@ fun ScheduleList(vm: MyViewModel, pagerState: PagerState) {
             } else {
                 Text(
                     text = "Сегодня занятия не проводятся",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    style = customTypography.robotoRegular16,
+                    color = customColors.secondaryTextAndIcons,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()

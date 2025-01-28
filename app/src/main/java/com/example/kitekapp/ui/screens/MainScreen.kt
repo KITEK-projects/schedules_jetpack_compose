@@ -17,6 +17,6 @@ fun MainScreen(
         val pagerState = rememberPagerState { viewModel.schedule.schedules.size }
         MainLayout(pagerState, navController, viewModel)
     } else {
-        PreloadScreen(viewModel)
+        PreloadScreen(viewModel, navController)
     }
 }

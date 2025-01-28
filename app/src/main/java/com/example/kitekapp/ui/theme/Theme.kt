@@ -2,28 +2,32 @@ package com.example.kitekapp.ui.theme
 
 import android.app.Activity
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-
-private val DarkColorScheme = darkColorScheme(
-    background = bg,
-    onBackground = bg_item,
-    onPrimary = opacity_white,
-    onSecondary = bg_additional,
-    primary = blue,
-    secondary = gray,
-    tertiary = teacher,
-)
+import com.example.kitekapp.data.model.CustomColors
+import com.example.kitekapp.data.model.CustomTypography
+import com.example.kitekapp.data.model.LocalCustomColors
+import com.example.kitekapp.data.model.LocalCustomTypography
 
 @Composable
-fun KITEKAPPTheme(
+fun AppTheme(
+//    darkTheme: Boolean = isSystemInDarkTheme()
     content: @Composable () -> Unit
 ) {
-    val colorScheme = DarkColorScheme
+    val colorScheme = CustomColors(
+        background = background,
+        itemPrimary = itemPrimary,
+        itemSecondary = itemSecondary,
+        mainText = mainText,
+        secondaryTextAndIcons = secondaryTextAndIcons,
+        accent = accent,
+        forLine = forLine
+    )
+
     val view = LocalView.current
 
     if (!view.isInEditMode) {
@@ -35,9 +39,20 @@ fun KITEKAPPTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalCustomColors provides colorScheme,
+        LocalCustomTypography provides typography
+    ) {
+        MaterialTheme(
+            content = content
+        )
+    }
 }
+
+val customColors: CustomColors
+    @Composable
+    get() = LocalCustomColors.current
+
+val customTypography: CustomTypography
+    @Composable
+    get() = LocalCustomTypography.current

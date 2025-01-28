@@ -13,6 +13,9 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 class ApiService {
     private val interceptor = HttpLoggingInterceptor().apply {
@@ -37,7 +40,9 @@ class ApiService {
 
     //СЛИТЬ 4 В 2
     private suspend fun getScheduleApi(client: String): Response<Schedule> {
-        return scheduleApi.getSchedule(client, "2021-01-12T22:47:25+06:00")
+        return scheduleApi.getSchedule(client, LocalDate.now().atStartOfDay(ZoneOffset.UTC).format(
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+//        return scheduleApi.getSchedule(client, "2021-01-12T22:47:25+06:00")
     }
 
     private suspend fun getClientsApi(isTeacher: Boolean): Response<List<String>> {
