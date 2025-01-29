@@ -191,17 +191,28 @@ fun ChangeClientList(
                     }
                 }
             } else if (filteredClients.isEmpty() && vm.clientList.isNotEmpty()) {
-                Text(
-                    text = "Ничего не найдено..",
-                    style = customTypography.robotoRegular12,
-                    color = customColors.secondaryTextAndIcons,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Ничего не найдено...",
+                        style = customTypography.robotoRegular12,
+                        color = customColors.secondaryTextAndIcons,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
             } else {
-                CircularProgressIndicator(
-                    color = customColors.secondaryTextAndIcons,
-                    strokeWidth = 2.5.dp,
-                )
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        color = customColors.secondaryTextAndIcons,
+                        strokeWidth = 2.5.dp,
+                    )
+                }
             }
         }
     }

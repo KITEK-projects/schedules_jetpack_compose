@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kitekapp.ui.components.layouts.AlertLayout
@@ -39,10 +37,27 @@ fun PreloadScreen(viewModel: MyViewModel, navController: NavController) {
             IsLoading()
         }
 
+    } else if (viewModel.responseCode == 404) {
+        AlertLayout(
+            header = "Упс...",
+            description = "Кажется нет расписания для ${viewModel.settingsData.clientName}, но вы можете выбрать другое расписание",
+            buttonTitle = "Выбрать",
+            onButtonClick = {
+                navController.navigate("change_schedule") {
+                    popUpTo("main")
+                }
+            }
+        )
     } else {
-        Text(
-            text = "${viewModel.responseCode} \n\n${viewModel.apiError}",
-            color = Color.White
+        AlertLayout(
+            header = "Упс...",
+            description = "Произошла не известная ошибка \n responseCode: ${viewModel.responseCode} \n ${viewModel.apiError}",
+            buttonTitle = "Выбрать",
+            onButtonClick = {
+                navController.navigate("change_schedule") {
+                    popUpTo("main")
+                }
+            }
         )
     }
 }
