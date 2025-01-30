@@ -32,6 +32,7 @@ import com.example.kitekapp.viewmodel.MyViewModel
 fun ScheduleListItem(
     viewModel: MyViewModel,
     item: Lesson,
+    date: String
 ) {
     Row(
         modifier = Modifier
@@ -63,12 +64,14 @@ fun ScheduleListItem(
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = calculateLessonSchedule(viewModel, item.number, lesson.partner),
+                        text = calculateLessonSchedule(viewModel, item.number, lesson.partner, date),
                         style = customTypography.robotoRegular14,
                         color = customColors.secondaryTextAndIcons,
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-                    Row {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Row (
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier

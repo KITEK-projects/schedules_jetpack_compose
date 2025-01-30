@@ -13,10 +13,10 @@ fun getDate(viewModel: MyViewModel, page: Int): String {
         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
 }
 
-//private fun isMonday(date: String): Boolean {
-//    val ldate = LocalDate.parse(date)
-//    return ldate.dayOfWeek == DayOfWeek.MONDAY
-//}
+fun isMonday(date: String): Boolean {
+    val ldate = LocalDate.parse(date)
+    return ldate.dayOfWeek == DayOfWeek.MONDAY
+}
 
 //private fun getTypeClient(input: String): String {
 //    if (input.contains('.')) {

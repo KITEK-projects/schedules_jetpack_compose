@@ -1,14 +1,16 @@
 package com.example.kitekapp.domain
 
 import com.example.kitekapp.utils.isFirstCourse
+import com.example.kitekapp.utils.isMonday
 import com.example.kitekapp.viewmodel.MyViewModel
 
 fun calculateLessonSchedule(
     viewModel: MyViewModel,
     number: Int,
-    partner: String
+    partner: String,
+    date: String
 ): String {
-    val hasCuratorialHour = viewModel.settingsData.isCuratorHour
+    val hasCuratorialHour = viewModel.settingsData.isCuratorHour && isMonday(date)
     val isFirstYear = isFirstCourse(if(viewModel.schedule.isTeacher) partner else viewModel.schedule.clientName)
 
     val baseSchedule = if (hasCuratorialHour) {

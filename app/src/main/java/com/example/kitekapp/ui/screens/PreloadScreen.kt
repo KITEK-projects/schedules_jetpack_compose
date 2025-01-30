@@ -48,6 +48,16 @@ fun PreloadScreen(viewModel: MyViewModel, navController: NavController) {
                 }
             }
         )
+    } else if (viewModel.responseCode == 0 && "No address associated with hostname" in viewModel.apiError ) {
+        AlertLayout(
+            header = "Упс...",
+            description = "Кажется вы не подключены к интернету",
+            buttonTitle = "Обновить",
+            onButtonClick = {
+                viewModel.responseCode = 0
+                viewModel.apiError = ""
+            }
+        )
     } else {
         AlertLayout(
             header = "Упс...",

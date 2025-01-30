@@ -13,15 +13,20 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.kitekapp.ui.theme.customColors
 import com.example.kitekapp.ui.theme.customTypography
+import com.example.kitekapp.utils.getDate
 import com.example.kitekapp.viewmodel.MyViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleList(vm: MyViewModel, pagerState: PagerState) {
     val snapAnimationSpec = spring(
@@ -48,7 +53,7 @@ fun ScheduleList(vm: MyViewModel, pagerState: PagerState) {
                     itemsIndexed(
                         vm.schedule.schedules.getOrNull(page)?.lessons ?: emptyList()
                     ) { _, item ->
-                        ScheduleListItem(vm, item)
+                        ScheduleListItem(vm, item, vm.schedule.schedules[page].date)
                     }
                 }
             } else {
