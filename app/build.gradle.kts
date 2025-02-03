@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.kitekapp"
+    namespace = "ru.xaoriNit.scheduleApp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.kitekapp"
+        applicationId = "ru.xaoriNit.scheduleApp"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

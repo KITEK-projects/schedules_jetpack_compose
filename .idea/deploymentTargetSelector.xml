@@ -3,11 +3,11 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="Unnamed">
-        <option name="selectionMode" value="DIALOG" />
-        <DropdownSelection timestamp="2025-01-30T15:43:17.759801600Z">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2025-01-31T15:09:55.761507300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Kredao\.android\avd\Medium_Phone_API_35-ext14.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=2A11295510CA0R5J" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -30,6 +30,9 @@
             </Target>
           </targets>
         </DialogSelection>
+      </SelectionState>
+      <SelectionState runConfigName="app">
+        <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
   </component>

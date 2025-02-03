@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "KITEKAPP"
+rootProject.name = "scheduleApp"
 include(":app")
  
