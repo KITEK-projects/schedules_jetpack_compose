@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "ru.xaoriNit.scheduleApp"
+    namespace = "com.example.KITEKAPP"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "ru.xaoriNit.scheduleApp"
+        applicationId = "com.example.KITEKAPP"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.7beta"
+        versionCode = 2
+        versionName = "1.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
