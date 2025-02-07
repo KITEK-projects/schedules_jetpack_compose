@@ -1,0 +1,52 @@
+package ru.omsktek.scheduleApp.ui.components.items
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import ru.omsktek.scheduleApp.ui.theme.customColors
+import ru.omsktek.scheduleApp.ui.theme.customTypography
+import ru.omsktek.scheduleApp.viewmodel.MyViewModel
+
+@Composable
+fun SettingsItem(
+    viewModel: MyViewModel,
+    title: String,
+    action: (Boolean) -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 5.dp)
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = title,
+            style = customTypography.robotoRegular16,
+            color = customColors.mainText
+        )
+        Switch(
+            checked = viewModel.settingsData.isCuratorHour,
+            onCheckedChange = {
+                action(it)
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = customColors.mainText,
+                checkedTrackColor = customColors.itemPrimary,
+                checkedBorderColor = Color.Transparent,
+                uncheckedThumbColor = customColors.secondaryTextAndIcons,
+                uncheckedBorderColor = Color.Transparent,
+                uncheckedTrackColor = customColors.itemPrimary
+            )
+        )
+    }
+}

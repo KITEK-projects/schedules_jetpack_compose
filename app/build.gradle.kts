@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.KITEKAPP"
-    compileSdk = 34
+    namespace = "ru.omsktek.scheduleApp"
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.KITEKAPP"
+        applicationId = "ru.omsktek.scheduleApp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.8"
+        versionCode = 3
+        versionName = "1.0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
