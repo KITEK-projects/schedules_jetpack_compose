@@ -68,7 +68,7 @@ fun ChangeClientList(
         ) {
             options.forEachIndexed { index, label ->
                 SegmentedButton(
-                    shape = RoundedCornerShape(4.dp),
+                    shape = RoundedCornerShape(12.dp),
                     onClick = {
                         vm.selectedTypeClient = index
                         vm.apiService.getClients(vm, index)
@@ -99,7 +99,8 @@ fun ChangeClientList(
                     Text(
                         text = label,
                         style = customTypography.robotoRegular16,
-                        color = customColors.mainText
+                        color = customColors.mainText,
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
             }
@@ -108,7 +109,7 @@ fun ChangeClientList(
             Box(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 4.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(RoundedCornerShape(12.dp))
                     .background(customColors.itemPrimary)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
@@ -176,7 +177,7 @@ fun ChangeClientList(
                                 containerColor = Color.Transparent,
                                 disabledContainerColor = Color.Transparent
                             ),
-                            shape = RoundedCornerShape(4.dp),
+                            shape = RoundedCornerShape(12.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
                             modifier = Modifier
                                 .fillMaxWidth()

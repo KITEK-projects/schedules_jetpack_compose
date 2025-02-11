@@ -27,6 +27,12 @@ class MyViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() 
 
     val apiService = ApiService()
 
+    var currentPage by mutableIntStateOf(0)
+        private set
+    fun updateCurrentPage(page: Int) {
+        currentPage = page
+    }
+
     init {
         viewModelScope.launch {
             loadSettingsData()

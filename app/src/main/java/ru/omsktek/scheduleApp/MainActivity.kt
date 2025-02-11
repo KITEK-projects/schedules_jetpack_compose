@@ -33,6 +33,8 @@ import ru.omsktek.scheduleApp.viewmodel.MyViewModelFactory
 
 class MainActivity : ComponentActivity() {
 
+
+
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +51,6 @@ class MainActivity : ComponentActivity() {
                     viewModel.responseCode = 0
                     viewModel.apiError = ""
                 }
-
 
                 val navController = rememberNavController()
                 NavHost(

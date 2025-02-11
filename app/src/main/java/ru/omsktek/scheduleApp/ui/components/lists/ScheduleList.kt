@@ -54,7 +54,7 @@ fun ScheduleList(vm: MyViewModel, pagerState: PagerState) {
                 }
             } else {
                 Text(
-                    text = "Расписание отсутсвует",
+                    text = "Расписание отсутствует",
                     style = customTypography.robotoRegular16,
                     color = customColors.secondaryTextAndIcons,
                     textAlign = TextAlign.Center,
