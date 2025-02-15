@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "42509334661",
+    "project_id": "schedule-app-kiteka",
+    "storage_bucket": "schedule-app-kiteka.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42509334661:android:4fe9ae7ff65d59b86851ec",
+        "android_client_info": {
+          "package_name": "ru.omsktek.scheduleApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-26Oof5vnZ8Fw9Y2eYouuQRLcLLt26uo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

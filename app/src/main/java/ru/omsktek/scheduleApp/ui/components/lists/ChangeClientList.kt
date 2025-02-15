@@ -53,7 +53,7 @@ fun ChangeClientList(
 
     val filteredClients = vm.clientList.filter { it.contains(textField, ignoreCase = true) }
     LaunchedEffect(LocalContext.current) {
-        vm.apiService.getClients(vm,0)
+        vm.apiService.getClients(vm,vm.selectedTypeClient)
     }
 
 
