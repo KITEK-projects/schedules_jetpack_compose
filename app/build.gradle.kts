@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "ru.omsktek.scheduleApp"
+    namespace = "ru.omsktec.scheduleApp"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "ru.omsktek.scheduleApp"
+        applicationId = "ru.omsktec.scheduleApp"
         minSdk = 26
         targetSdk = 36
         versionCode = 5
