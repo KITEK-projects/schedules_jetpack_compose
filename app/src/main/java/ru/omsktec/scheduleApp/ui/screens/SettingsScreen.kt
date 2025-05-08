@@ -17,7 +17,7 @@ fun SettingsScreen(
     navController: NavController,
     vm: MyViewModel,
 ) {
-    Column(
+    Column (
         modifier = Modifier.fillMaxHeight()
     ) {
         SecondaryScreenHeader(navController, "Настройки")

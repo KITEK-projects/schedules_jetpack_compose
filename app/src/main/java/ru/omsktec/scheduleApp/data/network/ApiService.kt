@@ -29,7 +29,7 @@ class ApiService {
         .create()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://omsktec-playgrounds.ru/api/v1/")
+        .baseUrl("http://app.omsktec.ru/api/v1/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
