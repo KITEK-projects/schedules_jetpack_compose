@@ -5,7 +5,6 @@ import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,9 +14,11 @@ import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ru.omsktec.scheduleApp.ui.components.items.PageIndicator
 import ru.omsktec.scheduleApp.ui.components.items.ScheduleListItem
 import ru.omsktec.scheduleApp.ui.theme.customColors
 import ru.omsktec.scheduleApp.ui.theme.customTypography
@@ -34,12 +35,11 @@ fun ScheduleList(vm: MyViewModel, pagerState: PagerState) {
         HorizontalPager(
             state = pagerState,
             beyondViewportPageCount = 1,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.Top
         ) { page ->
             if (vm.schedule.schedules.getOrNull(page)?.lessons?.isNotEmpty() == true) {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-
                     flingBehavior = PagerDefaults.flingBehavior(
                         state = pagerState,
                         decayAnimationSpec = rememberSplineBasedDecay(),
@@ -54,7 +54,7 @@ fun ScheduleList(vm: MyViewModel, pagerState: PagerState) {
                 }
             } else {
                 Text(
-                    text = "Расписание отсутствует",
+                    text = "На сегодня расписания нет",
                     style = customTypography.robotoRegular16,
                     color = customColors.secondaryTextAndIcons,
                     textAlign = TextAlign.Center,
@@ -64,5 +64,6 @@ fun ScheduleList(vm: MyViewModel, pagerState: PagerState) {
                 )
             }
         }
+        PageIndicator(pagerState)
     }
 }
